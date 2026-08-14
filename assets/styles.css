@@ -15,7 +15,6 @@
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --radius: 14px;
   --cols: 5;
-  --rows: 5;
   /* Kachelgröße: app.js rechnet sie aus Fensterbreite und -höhe aus und hält sie
      zwischen diesen Grenzen. Hier ändern, nicht im JavaScript. */
   --cell-min: 52px;

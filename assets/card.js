@@ -72,18 +72,19 @@ export function buildCard({ terms, cols, rows, freeSpace, seed, freeLabel = "Fre
   return cells;
 }
 
-/** Alle Gewinnlinien des Rasters — Zeilen, Spalten und bei quadratischen Karten die Diagonalen. */
+/** Alle Gewinnlinien des Rasters — Zeilen, Spalten und bei quadratischen Karten die Diagonalen.
+ *  `type` ist ein Schlüssel für i18n, kein anzeigbarer Text. */
 export function winningLines(cols, rows) {
   const lines = [];
   for (let r = 0; r < rows; r++) {
-    lines.push({ type: "Reihe", nr: r + 1, cells: Array.from({ length: cols }, (_, c) => r * cols + c) });
+    lines.push({ type: "row", nr: r + 1, cells: Array.from({ length: cols }, (_, c) => r * cols + c) });
   }
   for (let c = 0; c < cols; c++) {
-    lines.push({ type: "Spalte", nr: c + 1, cells: Array.from({ length: rows }, (_, r) => r * cols + c) });
+    lines.push({ type: "column", nr: c + 1, cells: Array.from({ length: rows }, (_, r) => r * cols + c) });
   }
   if (cols === rows) {
-    lines.push({ type: "Diagonale", nr: 1, cells: Array.from({ length: cols }, (_, i) => i * cols + i) });
-    lines.push({ type: "Diagonale", nr: 2, cells: Array.from({ length: cols }, (_, i) => i * cols + (cols - 1 - i)) });
+    lines.push({ type: "diagonal", nr: 1, cells: Array.from({ length: cols }, (_, i) => i * cols + i) });
+    lines.push({ type: "diagonal", nr: 2, cells: Array.from({ length: cols }, (_, i) => i * cols + (cols - 1 - i)) });
   }
   return lines;
 }

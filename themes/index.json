@@ -1,5 +1,5 @@
 [
-  { "id": "mitternacht", "name": "Mitternacht", "file": "mitternacht.json" },
-  { "id": "papier", "name": "Papier", "file": "papier.json" },
-  { "id": "neon", "name": "Neon", "file": "neon.json" }
+  { "id": "mitternacht", "file": "mitternacht.json" },
+  { "id": "papier", "file": "papier.json" },
+  { "id": "neon", "file": "neon.json" }
 ]

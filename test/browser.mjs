@@ -40,7 +40,7 @@ const check = (name, ok, detail = "") => {
 };
 
 const browser = await chromium.launch();
-const context = await browser.newContext({ acceptDownloads: true });
+const context = await browser.newContext({ acceptDownloads: true, locale: "de-DE", viewport: { width: 1600, height: 1000 } });
 const page = await context.newPage();
 
 const consoleErrors = [];
@@ -53,7 +53,56 @@ const tiles = page.locator(".tile");
 // Grundzustand
 check("Karte rendert 25 Felder (5×5)", (await tiles.count()) === 25, `${await tiles.count()} Felder`);
 check("Titel kommt aus dem Theme", (await page.locator("#brand-title").textContent()) === "Bingo Box");
-check("Alle mitgelieferten Pools stehen zur Wahl", (await page.locator("#pool-select option").count()) === 4);
+check("Alle mitgelieferten Pools stehen zur Wahl", (await page.locator("#pool-select option").count()) === 8);
+check(
+  "Pools sind nach Sprache gruppiert, Deutsch zuerst",
+  (await page.locator("#pool-select optgroup").first().getAttribute("label")) === "Deutsch" &&
+    (await page.locator('#pool-select optgroup[label="Deutsch"] option').count()) === 4 &&
+    (await page.locator('#pool-select optgroup[label="English"] option').count()) === 4,
+);
+
+// Kachelgröße passt sich dem Fenster an
+const metrics = async () =>
+  page.evaluate(() => {
+    const grid = document.getElementById("grid");
+    const tile = grid.querySelector(".tile").getBoundingClientRect();
+    const root = getComputedStyle(document.documentElement);
+    return {
+      cell: parseFloat(getComputedStyle(grid).getPropertyValue("--cell")),
+      width: tile.width,
+      height: tile.height,
+      min: parseFloat(root.getPropertyValue("--cell-min")),
+      max: parseFloat(root.getPropertyValue("--cell-max")),
+      docHeight: document.documentElement.scrollHeight,
+      winHeight: window.innerHeight,
+    };
+  });
+
+let m = await metrics();
+check("Kacheln sind quadratisch und so groß wie berechnet",
+  Math.abs(m.width - m.height) < 1.5 && Math.abs(m.width - m.cell) < 1.5, `${m.width}×${m.height}, --cell=${m.cell}`);
+check("Kachelgröße bleibt innerhalb der Grenzen", m.cell <= m.max && m.cell >= m.min, `${m.cell} in [${m.min}, ${m.max}]`);
+check("Karte passt ohne Scrollen ins Fenster", m.docHeight <= m.winHeight + 1, `${m.docHeight} > ${m.winHeight}`);
+
+const roomy = m.cell;
+await page.setViewportSize({ width: 1600, height: 800 });
+await page.waitForTimeout(200);
+m = await metrics();
+check("Niedrigeres Fenster verkleinert die Kacheln und bleibt scrollfrei",
+  m.cell < roomy && m.cell > m.min && m.docHeight <= m.winHeight + 1, `--cell=${m.cell} (vorher ${roomy})`);
+
+// Reicht die Höhe selbst bei Mindestgröße nicht, gewinnt die Lesbarkeit und die Seite scrollt.
+await page.setViewportSize({ width: 1600, height: 620 });
+await page.waitForTimeout(200);
+m = await metrics();
+check("Sehr flaches Fenster hält die Mindestgröße", Math.abs(m.cell - m.min) < 1.5, `--cell=${m.cell}, min=${m.min}`);
+
+await page.setViewportSize({ width: 3000, height: 1800 });
+await page.waitForTimeout(200);
+m = await metrics();
+check("Sehr großes Fenster stößt an die Maximalgröße", Math.abs(m.cell - m.max) < 1.5, `--cell=${m.cell}, max=${m.max}`);
+await page.setViewportSize({ width: 1600, height: 1000 });
+await page.waitForTimeout(200);
 
 // Abhaken und Bingo
 for (let i = 0; i < 5; i++) await tiles.nth(i).click();
@@ -171,6 +220,29 @@ await page.setViewportSize({ width: 390, height: 844 });
 await page.waitForTimeout(150);
 const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 check("Kein horizontales Scrollen auf dem Handy", overflow <= 0, `${overflow}px Überhang`);
+
+// Sprachumschaltung
+await page.selectOption("#pool-select", "krimi.de");
+await page.waitForTimeout(150);
+await page.selectOption("#lang-select", "en");
+await page.waitForTimeout(200);
+check("Oberfläche wechselt auf Englisch",
+  (await page.locator("#btn-new").textContent()) === "New card" &&
+    (await page.locator("#btn-pool").textContent()) === "Edit terms",
+  await page.locator("#btn-new").textContent());
+check("Der Pool wechselt zum selben Thema in der neuen Sprache",
+  (await page.locator("#pool-select").inputValue()) === "crime-drama.en",
+  await page.locator("#pool-select").inputValue());
+check("Kartenzeile ist übersetzt", (await page.locator("#card-info").textContent()).includes("Card"),
+  await page.locator("#card-info").textContent());
+check("html-lang-Attribut folgt der Sprache", (await page.getAttribute("html", "lang")) === "en");
+
+await page.locator(".tile").nth(0).click();
+check("Statuszeile ist übersetzt", (await page.locator("#status").textContent()).includes("to go"),
+  await page.locator("#status").textContent());
+
+await page.reload({ waitUntil: "networkidle" });
+check("Sprachwahl übersteht das Neuladen", (await page.locator("#lang-select").inputValue()) === "en");
 
 check("Keine Fehler in der Browser-Konsole", consoleErrors.length === 0, consoleErrors.join(" | "));
 

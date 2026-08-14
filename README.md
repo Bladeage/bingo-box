@@ -1,62 +1,66 @@
 # Bingo Box
 
-Bingo-Karten für jeden Anlass — Meeting, Spieleshow, Fußballabend, Sonntagskrimi.
-Eigene Begriffe, eigenes Branding, ein Link für alle.
+Bingo cards for any occasion — a meeting, a games showcase, a football match, a Sunday
+night crime drama. Your own terms, your own branding, one link for everyone.
 
-**→ [Zur Anwendung](https://bladeage.github.io/bingo-box/)**
+**→ [Open the app](https://bladeage.github.io/bingo-box/)** · [Deutsche Fassung dieser Datei](README.de.md)
 
-Läuft vollständig im Browser: keine Installation, kein Konto, kein Server, kein Tracking.
-Alles, was du eingibst, bleibt auf deinem Gerät oder in dem Link, den du selbst weitergibst.
+Runs entirely in the browser: no install, no account, no server, no tracking. Everything
+you type stays on your device or inside the link you choose to pass on.
 
-## Was es kann
+## What it does
 
-- **Karte spielen:** Felder antippen, Bingo wird automatisch erkannt (Reihe, Spalte, Diagonale, volle Karte)
-- **Raster wählen:** 3 × 3 bis 5 × 6, wahlweise mit Freifeld in der Mitte
-- **Eigene Begriffe:** im Browser eintippen oder als Datei laden, wieder exportieren
-- **Eigenes Branding:** Titel, Untertitel, Logo, Schrift, Farben — für Verein, Stream oder Firmenfeier
-- **Teilen:** ein Link enthält Begriffe, Branding und Kartennummer. Wer ihn öffnet, bekommt **dieselbe** Karte — Voraussetzung dafür, gemeinsam zu spielen
-- **Als Bild sichern:** PNG für Chat, Discord oder zum Ausdrucken
-- **Stand bleibt erhalten:** Neuladen verliert die abgehakten Felder nicht
+- **Play a card:** tap the tiles, bingo is detected automatically (row, column, diagonal, full card)
+- **Pick a grid:** 3 × 3 up to 5 × 6, with an optional free space in the middle
+- **Tiles fit the window:** the card is sized to the space available, between a minimum and a maximum
+- **Two interface languages:** German and English, detected from the browser and switchable
+- **Your own terms:** type them in, load them from a file, export them again
+- **Your own branding:** headline, subtitle, logo, typeface, colours — for a club, a stream or a company party
+- **Share:** one link carries the terms, the branding and the card number. Whoever opens it gets **the same card** — the prerequisite for playing together
+- **Save as an image:** PNG for chat, Discord or the printer
+- **Progress survives:** reloading does not lose the tiles you already marked
 
-## Eigene Begriffe
+## Your own terms
 
-Am schnellsten über **„Begriffe bearbeiten"** in der Anwendung. Wer eine Liste dauerhaft
-mitliefern will, legt sie als Datei unter `pools/` ab:
+Fastest way: **“Edit terms”** in the app. To ship a list permanently, put it in `pools/`:
 
 ```json
 {
-  "id": "meine-liste",
-  "name": "Meine Liste",
-  "description": "Wofür die Liste gedacht ist.",
-  "language": "de",
-  "terms": ["Erster Begriff", "Zweiter Begriff", "…"]
+  "id": "my-list.en",
+  "name": "My List",
+  "description": "What the list is for.",
+  "language": "en",
+  "terms": ["First term", "Second term", "…"]
 }
 ```
 
-Danach einen Eintrag in `pools/index.json` ergänzen:
+Then add an entry to `pools/index.json`:
 
 ```json
-{ "id": "meine-liste", "name": "Meine Liste", "file": "meine-liste.json" }
+{ "id": "my-list.en", "topic": "my-list", "language": "en", "file": "my-list.en.json" }
 ```
 
-Faustregel: mindestens so viele Begriffe wie Felder — für 5 × 5 also 25, besser deutlich
-mehr, damit sich die Karten der Mitspielenden unterscheiden. Reicht der Pool nicht,
-sagt die Anwendung das mit Zahlen statt abzustürzen.
+`topic` ties translations of the same list together: switching the interface language also
+switches the pool to the matching one, if there is one.
 
-Mitgeliefert sind vier Beispiele: **Meeting-Bingo**, **Games-Showcase**,
-**Fußball-Kommentar** und **Krimi-Sonntag**.
+Rule of thumb: at least as many terms as there are tiles — 25 for a 5 × 5 grid, ideally a
+lot more so that players' cards differ. If a pool is too small, the app says so with
+numbers instead of breaking.
 
-## Eigenes Branding
+Eight pools ship with the app: **Meeting Bingo**, **Games Showcase**, **Football
+Commentary** and **Crime Drama**, each in German and English.
 
-Themes liegen unter `themes/` und funktionieren genauso. Im Editor wählt man fünf Farben,
-die übrigen werden passend dazu gemischt.
+## Your own branding
+
+Themes live in `themes/` and work the same way. The editor asks for five colours and
+mixes the rest to match.
 
 ```json
 {
-  "id": "mein-verein",
-  "name": "Mein Verein",
-  "title": "Vereinsheim-Bingo",
-  "subtitle": "Jeden Freitag ab 20 Uhr",
+  "id": "my-club",
+  "name": "My Club",
+  "title": "Clubhouse Bingo",
+  "subtitle": "Every Friday from 8pm",
   "logo": "https://example.org/logo.png",
   "font": "system",
   "colors": { "bg": "#101820", "tile": "#1d2733", "tileMarked": "#f2a900", "text": "#ffffff", "accent": "#f2a900" },
@@ -64,60 +68,69 @@ die übrigen werden passend dazu gemischt.
 }
 ```
 
-`font` kennt `system`, `serif`, `mono` und `rounded`. Als `logo` geht eine URL oder ein
-eingebettetes Bild — Letzteres macht den Teilen-Link allerdings lang, deshalb ist bei
-300 KB Schluss.
+`font` accepts `system`, `serif`, `mono` and `rounded`. `logo` takes a URL or an embedded
+image — the latter makes the share link long, so it is capped at 300 KB. The themes that
+ship with the app use `nameKey` instead of `name` so their names follow the interface
+language.
 
-## Für den eigenen Anlass forken
+## Another interface language
 
-1. Repository forken
-2. Eigene Dateien unter `pools/` und `themes/` ablegen, Kataloge ergänzen
-3. Unter *Settings → Pages* die Quelle auf den `main`-Branch stellen
-4. Fertig — die Seite liegt unter `https://<name>.github.io/<repo>/`
+Add an entry to `LANGUAGES` and a block of strings to `STRINGS` in
+[`assets/i18n.js`](assets/i18n.js), then add the matching pools under `pools/`. The test
+suite fails if a language is missing a string or a pool topic, so nothing can quietly
+fall behind.
 
-Ein Build-Schritt ist nicht nötig; das Repository ist die Website.
+## Fork it for your own event
 
-## Lokal ausprobieren
+1. Fork the repository
+2. Drop your files into `pools/` and `themes/` and extend the catalogues
+3. Under *Settings → Pages*, set the source to the `main` branch
+4. Done — your copy lives at `https://<name>.github.io/<repo>/`
 
-Die Pools werden per `fetch` geladen, deshalb braucht es einen kleinen Webserver —
-ein Doppelklick auf `index.html` reicht wegen der Browser-Sicherheitsrichtlinien nicht:
+There is no build step; the repository is the website.
+
+## Run it locally
+
+The pools are fetched over HTTP, so a small web server is needed — double-clicking
+`index.html` is blocked by the browser's security rules:
 
 ```bash
 python3 -m http.server 8000
-# dann http://localhost:8000 öffnen
+# then open http://localhost:8000
 ```
 
 ## Tests
 
 ```bash
-npm test            # Kartenlogik, Bingo-Erkennung, Teilen-Kodierung, mitgelieferte Dateien
-npm install         # nur für den Browsertest nötig
-npm run test:browser  # klickt die Anwendung in Chromium durch
+npm test              # card logic, bingo detection, share encoding, translations, shipped files
+npm install           # only needed for the browser test
+npm run test:browser  # clicks through the app in Chromium
 ```
 
-Beides läuft auch bei jedem Pull Request über GitHub Actions.
+Both run on every pull request via GitHub Actions.
 
-## Aufbau
+## Layout
 
 ```
-index.html          Aufbau der Seite
-assets/app.js       Verdrahtung: Auswahl, Dialoge, Ereignisse
-assets/card.js      Kartenerzeugung (deterministisch) und Bingo-Erkennung
-assets/share.js     Konfiguration im URL-Fragment kodieren/dekodieren
-assets/theme.js     Branding als CSS-Variablen
-assets/data.js      Laden der Kataloge, eigene Pools, Abhak-Stand
-assets/export.js    PNG-Ausgabe über Canvas
-pools/              Begriffslisten
-themes/             Branding-Vorlagen
+index.html          page structure
+assets/app.js       wiring: selectors, dialogs, events, tile sizing
+assets/card.js      card generation (deterministic) and bingo detection
+assets/share.js     encode/decode the configuration in the URL fragment
+assets/theme.js     branding as CSS variables
+assets/i18n.js      interface strings and language detection
+assets/data.js      catalogues, custom pools, marked-tile storage
+assets/export.js    PNG output via canvas
+pools/              term lists
+themes/             branding presets
 ```
 
-## Herkunft
+## Origin
 
-Nachfolger von [Hooked-Bingo-v3](https://github.com/Bladeage/Hooked-Bingo-v3) (2018) —
-einem Windows-Programm in C#/WPF, das für eine bestimmte Community eine feste Kartenvorlage
-mit Begriffen von Pastebin bemalt hat. Diese Fassung tut dasselbe für alle: im Browser,
-auf jedem Gerät, mit frei wählbaren Begriffen und frei wählbarem Aussehen.
+Successor to [Hooked-Bingo-v3](https://github.com/Bladeage/Hooked-Bingo-v3) (2018) — a
+Windows program in C#/WPF that painted a fixed card template with terms from Pastebin for
+one particular community. This version does the same for everyone: in the browser, on any
+device, with freely chosen terms and a freely chosen look.
 
-## Lizenz
+## Licence
 
 [MIT](LICENSE)

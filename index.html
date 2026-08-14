@@ -6,14 +6,14 @@
     <title>Bingo Box</title>
     <meta
       name="description"
-      content="Bingo-Karten für jeden Anlass: eigene Begriffe, eigenes Branding, ein Link für alle. Läuft komplett im Browser."
+      content="Bingo cards for any occasion: your own terms, your own branding, one link for everyone. Runs entirely in the browser."
     />
     <meta name="color-scheme" content="dark light" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#karte">Direkt zur Karte</a>
+    <a class="skip-link" href="#karte" data-i18n="app.skip">Direkt zur Karte</a>
 
     <header class="brand">
       <img id="brand-logo" class="brand__logo" alt="" hidden />
@@ -23,17 +23,17 @@
       </div>
     </header>
 
-    <section class="toolbar" aria-label="Karte einstellen">
+    <section class="toolbar" data-i18n-label="toolbar.section">
       <div class="field">
-        <label for="pool-select">Begriffe</label>
+        <label for="pool-select" data-i18n="toolbar.pool">Begriffe</label>
         <select id="pool-select"></select>
       </div>
       <div class="field">
-        <label for="theme-select">Aussehen</label>
+        <label for="theme-select" data-i18n="toolbar.theme">Aussehen</label>
         <select id="theme-select"></select>
       </div>
       <div class="field">
-        <label for="grid-select">Raster</label>
+        <label for="grid-select" data-i18n="toolbar.grid">Raster</label>
         <select id="grid-select">
           <option value="3x3">3 × 3</option>
           <option value="4x4">4 × 4</option>
@@ -41,17 +41,21 @@
           <option value="5x6">5 × 6</option>
         </select>
       </div>
+      <div class="field">
+        <label for="lang-select" data-i18n="toolbar.language">Sprache</label>
+        <select id="lang-select"></select>
+      </div>
       <div class="field field--check">
         <input type="checkbox" id="free-space" />
-        <label for="free-space">Freifeld in der Mitte</label>
+        <label for="free-space" data-i18n="toolbar.freeSpace">Freifeld in der Mitte</label>
       </div>
 
       <div class="actions">
-        <button type="button" id="btn-new" class="btn btn--primary">Neue Karte</button>
-        <button type="button" id="btn-share" class="btn">Teilen</button>
-        <button type="button" id="btn-png" class="btn">Als Bild</button>
-        <button type="button" id="btn-pool" class="btn">Begriffe bearbeiten</button>
-        <button type="button" id="btn-theme" class="btn">Branding</button>
+        <button type="button" id="btn-new" class="btn btn--primary" data-i18n="btn.new">Neue Karte</button>
+        <button type="button" id="btn-share" class="btn" data-i18n="btn.share">Teilen</button>
+        <button type="button" id="btn-png" class="btn" data-i18n="btn.png">Als Bild</button>
+        <button type="button" id="btn-pool" class="btn" data-i18n="btn.pool">Begriffe bearbeiten</button>
+        <button type="button" id="btn-theme" class="btn" data-i18n="btn.theme">Branding</button>
       </div>
     </section>
 
@@ -59,38 +63,38 @@
     <p id="error" class="error" role="alert" hidden></p>
 
     <main id="karte">
-      <div id="grid" class="grid" role="group" aria-label="Bingo-Karte"></div>
+      <div id="grid" class="grid" role="group" data-i18n-label="card.label"></div>
     </main>
 
     <footer class="footer">
       <p id="card-info" class="card-info"></p>
-      <nav id="brand-links" class="brand-links" aria-label="Links"></nav>
+      <nav id="brand-links" class="brand-links" data-i18n-label="footer.links"></nav>
       <p class="colophon">
-        Läuft ohne Server, ohne Konto, ohne Tracking —
-        <a href="https://github.com/Bladeage/bingo-box">Quellcode &amp; eigene Pools</a>
+        <span data-i18n="footer.colophon">Läuft ohne Server, ohne Konto, ohne Tracking — </span
+        ><a href="https://github.com/Bladeage/bingo-box" data-i18n="footer.source">Quellcode &amp; eigene Pools</a>
       </p>
     </footer>
 
     <!-- Begriffe bearbeiten -->
     <dialog id="pool-dialog" class="dialog">
       <form method="dialog" class="dialog__body">
-        <h2>Begriffe</h2>
+        <h2 data-i18n="pool.heading">Begriffe</h2>
         <div class="field">
-          <label for="pool-name">Name des Pools</label>
+          <label for="pool-name" data-i18n="pool.name">Name des Pools</label>
           <input type="text" id="pool-name" required maxlength="60" />
         </div>
         <div class="field">
-          <label for="pool-terms">Ein Begriff pro Zeile</label>
+          <label for="pool-terms" data-i18n="pool.terms">Ein Begriff pro Zeile</label>
           <textarea id="pool-terms" rows="14" spellcheck="true"></textarea>
           <p id="pool-count" class="hint"></p>
         </div>
         <div class="dialog__actions">
-          <button type="button" id="pool-import" class="btn">Datei laden</button>
-          <button type="button" id="pool-export" class="btn">Als Datei sichern</button>
-          <button type="button" id="pool-delete" class="btn btn--danger">Löschen</button>
+          <button type="button" id="pool-import" class="btn" data-i18n="btn.import">Datei laden</button>
+          <button type="button" id="pool-export" class="btn" data-i18n="btn.export">Als Datei sichern</button>
+          <button type="button" id="pool-delete" class="btn btn--danger" data-i18n="btn.delete">Löschen</button>
           <span class="spacer"></span>
-          <button type="button" id="pool-cancel" class="btn">Abbrechen</button>
-          <button type="button" id="pool-save" class="btn btn--primary">Übernehmen</button>
+          <button type="button" id="pool-cancel" class="btn" data-i18n="btn.cancel">Abbrechen</button>
+          <button type="button" id="pool-save" class="btn btn--primary" data-i18n="btn.save">Übernehmen</button>
         </div>
         <input type="file" id="pool-file" accept="application/json,.json,.txt" hidden />
       </form>
@@ -99,59 +103,59 @@
     <!-- Branding -->
     <dialog id="theme-dialog" class="dialog">
       <form method="dialog" class="dialog__body">
-        <h2>Branding</h2>
+        <h2 data-i18n="theme.heading">Branding</h2>
         <div class="field">
-          <label for="theme-name">Name des Themes</label>
+          <label for="theme-name" data-i18n="theme.name">Name des Themes</label>
           <input type="text" id="theme-name" required maxlength="60" />
         </div>
         <div class="grid-2">
           <div class="field">
-            <label for="theme-title">Überschrift</label>
+            <label for="theme-title" data-i18n="theme.title">Überschrift</label>
             <input type="text" id="theme-title" maxlength="80" />
           </div>
           <div class="field">
-            <label for="theme-subtitle">Unterzeile</label>
+            <label for="theme-subtitle" data-i18n="theme.subtitle">Unterzeile</label>
             <input type="text" id="theme-subtitle" maxlength="140" />
           </div>
         </div>
         <div class="grid-2">
           <div class="field">
-            <label for="theme-logo">Logo (URL)</label>
+            <label for="theme-logo" data-i18n="theme.logo">Logo (URL)</label>
             <input type="url" id="theme-logo" placeholder="https://…" />
           </div>
           <div class="field">
-            <label for="theme-logo-file">…oder Bilddatei</label>
+            <label for="theme-logo-file" data-i18n="theme.logoFile">…oder Bilddatei</label>
             <input type="file" id="theme-logo-file" accept="image/*" />
           </div>
         </div>
         <div class="field">
-          <label for="theme-font">Schrift</label>
+          <label for="theme-font" data-i18n="theme.font">Schrift</label>
           <select id="theme-font">
-            <option value="system">Serifenlos</option>
-            <option value="serif">Serif</option>
-            <option value="mono">Monospace</option>
-            <option value="rounded">Rund</option>
+            <option value="system" data-i18n="font.system">Serifenlos</option>
+            <option value="serif" data-i18n="font.serif">Serif</option>
+            <option value="mono" data-i18n="font.mono">Monospace</option>
+            <option value="rounded" data-i18n="font.rounded">Rund</option>
           </select>
         </div>
         <fieldset class="colors">
-          <legend>Farben</legend>
-          <label>Hintergrund <input type="color" id="color-bg" /></label>
-          <label>Kachel <input type="color" id="color-tile" /></label>
-          <label>Treffer <input type="color" id="color-tileMarked" /></label>
-          <label>Text <input type="color" id="color-text" /></label>
-          <label>Akzent <input type="color" id="color-accent" /></label>
+          <legend data-i18n="theme.colors">Farben</legend>
+          <label><span data-i18n="theme.color.bg">Hintergrund</span> <input type="color" id="color-bg" /></label>
+          <label><span data-i18n="theme.color.tile">Kachel</span> <input type="color" id="color-tile" /></label>
+          <label><span data-i18n="theme.color.tileMarked">Treffer</span> <input type="color" id="color-tileMarked" /></label>
+          <label><span data-i18n="theme.color.text">Text</span> <input type="color" id="color-text" /></label>
+          <label><span data-i18n="theme.color.accent">Akzent</span> <input type="color" id="color-accent" /></label>
         </fieldset>
         <div class="field">
-          <label for="theme-links">Fußzeilen-Links — je Zeile <code>Beschriftung | https://…</code></label>
+          <label for="theme-links" data-i18n-html="theme.links">Fußzeilen-Links</label>
           <textarea id="theme-links" rows="3"></textarea>
         </div>
         <div class="dialog__actions">
-          <button type="button" id="theme-import" class="btn">Datei laden</button>
-          <button type="button" id="theme-export" class="btn">Als Datei sichern</button>
-          <button type="button" id="theme-delete" class="btn btn--danger">Löschen</button>
+          <button type="button" id="theme-import" class="btn" data-i18n="btn.import">Datei laden</button>
+          <button type="button" id="theme-export" class="btn" data-i18n="btn.export">Als Datei sichern</button>
+          <button type="button" id="theme-delete" class="btn btn--danger" data-i18n="btn.delete">Löschen</button>
           <span class="spacer"></span>
-          <button type="button" id="theme-cancel" class="btn">Abbrechen</button>
-          <button type="button" id="theme-save" class="btn btn--primary">Übernehmen</button>
+          <button type="button" id="theme-cancel" class="btn" data-i18n="btn.cancel">Abbrechen</button>
+          <button type="button" id="theme-save" class="btn btn--primary" data-i18n="btn.save">Übernehmen</button>
         </div>
         <input type="file" id="theme-file" accept="application/json,.json" hidden />
       </form>
@@ -160,23 +164,20 @@
     <!-- Teilen -->
     <dialog id="share-dialog" class="dialog">
       <form method="dialog" class="dialog__body">
-        <h2>Teilen</h2>
-        <p class="hint">
-          Der Link enthält Begriffe, Branding und die Kartennummer. Wer ihn öffnet, bekommt
-          <strong>genau dieselbe Karte</strong>. Nichts davon wird an einen Server geschickt.
-        </p>
+        <h2 data-i18n="share.heading">Teilen</h2>
+        <p class="hint" data-i18n-html="share.hint"></p>
         <div class="field">
-          <label for="share-url">Link</label>
+          <label for="share-url" data-i18n="share.url">Link</label>
           <input type="text" id="share-url" readonly />
         </div>
         <label class="field field--check">
           <input type="checkbox" id="share-same-card" checked />
-          <span>Alle bekommen dieselbe Karte (sonst würfelt jeder neu)</span>
+          <span data-i18n="share.sameCard">Alle bekommen dieselbe Karte</span>
         </label>
         <div class="dialog__actions">
           <span class="spacer"></span>
-          <button type="button" id="share-close" class="btn">Schließen</button>
-          <button type="button" id="share-copy" class="btn btn--primary">Kopieren</button>
+          <button type="button" id="share-close" class="btn" data-i18n="btn.close">Schließen</button>
+          <button type="button" id="share-copy" class="btn btn--primary" data-i18n="btn.copy">Kopieren</button>
         </div>
       </form>
     </dialog>

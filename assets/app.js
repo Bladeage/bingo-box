@@ -1,11 +1,13 @@
-// Verdrahtung: lädt Pools und Themes, baut die Karte, hält Abhak-Stand und Teilen-Link
-// zusammen. Fachlogik steckt in card.js, share.js, theme.js, data.js und export.js.
+// Verdrahtung: lädt Pools und Themes, baut die Karte, hält Abhak-Stand, Sprache und
+// Teilen-Link zusammen. Fachlogik steckt in card.js, share.js, theme.js, data.js,
+// i18n.js und export.js.
 
 import { buildCard, findBingos, freeSpacePossible, randomSeed, termsNeeded } from "./card.js";
 import { applyTheme, deriveColors, DEFAULT_THEME, normalizeTheme } from "./theme.js";
 import * as store from "./data.js";
 import { buildShareUrl, decodeConfig, readHash } from "./share.js";
 import { downloadCanvas, renderCardCanvas } from "./export.js";
+import { detectLocale, isSupported, LANGUAGES, locale, setLocale, t, translateDocument } from "./i18n.js";
 
 const el = (id) => document.getElementById(id);
 
@@ -23,11 +25,15 @@ const state = {
 };
 
 const currentPool = () => state.pools.find((p) => p.id === state.poolId) || state.pools[0];
-const currentTheme = () => state.themes.find((t) => t.id === state.themeId) || state.themes[0];
+const currentTheme = () => state.themes.find((entry) => entry.id === state.themeId) || state.themes[0];
 
 // --- Start ---------------------------------------------------------------
 
 async function init() {
+  setLocale(detectLocale(), { remember: false });
+  translateDocument();
+  fillLanguageSelect();
+
   const [pools, themes] = await Promise.all([
     store.loadBundled("pools").catch(() => []),
     store.loadBundled("themes").catch(() => []),
@@ -36,10 +42,7 @@ async function init() {
   state.themes = [...themes, ...store.customThemes.all()];
 
   if (!state.pools.length) {
-    showError(
-      "Die Begriffs-Pools konnten nicht geladen werden. Beim lokalen Öffnen bitte einen kleinen " +
-        "Webserver benutzen, z. B. „python3 -m http.server“.",
-    );
+    showError(t("error.noPools"));
     return;
   }
   if (!state.themes.length) state.themes = [DEFAULT_THEME];
@@ -62,7 +65,13 @@ function readSettings(shared) {
   if (last && state.pools.some((p) => p.id === last.poolId)) {
     return { ...last, seed: last.seed || randomSeed() };
   }
-  return {};
+  return { poolId: defaultPoolId() };
+}
+
+/** Ohne Vorgeschichte: der erste mitgelieferte Pool in der Oberflächensprache. */
+function defaultPoolId() {
+  const match = state.pools.find((p) => p.builtin && p.language === locale());
+  return (match || state.pools[0]).id;
 }
 
 /** Liest eine geteilte Konfiguration aus dem URL-Fragment und stellt Pool/Theme bereit. */
@@ -72,6 +81,12 @@ async function loadSharedConfig() {
   const config = await decodeConfig(raw);
   if (!config) return null;
 
+  if (config.l && isSupported(config.l)) {
+    setLocale(config.l, { remember: false });
+    translateDocument();
+    fillLanguageSelect();
+  }
+
   const settings = {
     cols: config.g?.[0],
     rows: config.g?.[1],
@@ -80,7 +95,7 @@ async function loadSharedConfig() {
   };
 
   if (config.p?.terms) {
-    const pool = { id: "geteilt:pool", name: config.p.name || "Geteilte Begriffe", terms: config.p.terms, shared: true };
+    const pool = { id: "geteilt:pool", name: config.p.name || t("pool.shared"), terms: config.p.terms, shared: true };
     state.pools = [pool, ...state.pools.filter((p) => p.id !== pool.id)];
     settings.poolId = pool.id;
   } else if (config.p?.ref) {
@@ -88,8 +103,8 @@ async function loadSharedConfig() {
   }
 
   if (config.t?.colors) {
-    const theme = normalizeTheme({ ...config.t, id: "geteilt:theme", name: config.t.name || "Geteiltes Branding", shared: true });
-    state.themes = [theme, ...state.themes.filter((t) => t.id !== theme.id)];
+    const theme = { ...config.t, id: "geteilt:theme", name: config.t.name || t("theme.shared"), shared: true };
+    state.themes = [theme, ...state.themes.filter((entry) => entry.id !== theme.id)];
     settings.themeId = theme.id;
   } else if (config.t?.ref) {
     settings.themeId = config.t.ref;
@@ -101,8 +116,8 @@ async function loadSharedConfig() {
 function applySettings(settings = {}) {
   state.poolId = settings.poolId && state.pools.some((p) => p.id === settings.poolId)
     ? settings.poolId
-    : state.pools[0].id;
-  state.themeId = settings.themeId && state.themes.some((t) => t.id === settings.themeId)
+    : defaultPoolId();
+  state.themeId = settings.themeId && state.themes.some((entry) => entry.id === settings.themeId)
     ? settings.themeId
     : state.themes[0].id;
   state.cols = Number(settings.cols) || 5;
@@ -127,18 +142,44 @@ function optionGroup(label, entries, selectedId) {
   return group;
 }
 
+function fillLanguageSelect() {
+  const select = el("lang-select");
+  select.replaceChildren(
+    ...LANGUAGES.map(({ code, label }) => {
+      const option = document.createElement("option");
+      option.value = code;
+      option.textContent = label; // Sprachen stehen immer in ihrer eigenen Sprache
+      option.selected = code === locale();
+      return option;
+    }),
+  );
+}
+
+/** Pools nach Sprache gruppiert, die eigene Sprache zuerst. */
+function poolGroups() {
+  const ordered = [...LANGUAGES].sort((a, b) => (a.code === locale() ? -1 : b.code === locale() ? 1 : 0));
+  return [
+    ...ordered.map(({ code, label }) => [label, state.pools.filter((p) => p.builtin && p.language === code)]),
+    [t("group.custom"), state.pools.filter((p) => !p.builtin && !p.shared)],
+    [t("group.shared"), state.pools.filter((p) => p.shared)],
+  ];
+}
+
 function fillSelectors() {
-  const fill = (select, entries, selectedId) => {
-    select.replaceChildren(
-      ...[
-        optionGroup("Mitgeliefert", entries.filter((e) => e.builtin), selectedId),
-        optionGroup("Eigene", entries.filter((e) => !e.builtin && !e.shared), selectedId),
-        optionGroup("Aus dem Link", entries.filter((e) => e.shared), selectedId),
-      ].filter(Boolean),
-    );
-  };
-  fill(el("pool-select"), state.pools, state.poolId);
-  fill(el("theme-select"), state.themes, state.themeId);
+  el("pool-select").replaceChildren(
+    ...poolGroups()
+      .map(([label, entries]) => optionGroup(label, entries, state.poolId))
+      .filter(Boolean),
+  );
+
+  const themes = state.themes.map((theme) => ({ ...normalizeTheme(theme), builtin: theme.builtin, shared: theme.shared }));
+  el("theme-select").replaceChildren(
+    ...[
+      optionGroup(t("group.builtin"), themes.filter((entry) => entry.builtin), state.themeId),
+      optionGroup(t("group.custom"), themes.filter((entry) => !entry.builtin && !entry.shared), state.themeId),
+      optionGroup(t("group.shared"), themes.filter((entry) => entry.shared), state.themeId),
+    ].filter(Boolean),
+  );
 
   el("grid-select").value = `${state.cols}x${state.rows}`;
   el("free-space").checked = state.freeSpace;
@@ -159,14 +200,20 @@ function newCard({ seed = randomSeed(), keepMarks = false } = {}) {
       rows: state.rows,
       freeSpace: state.freeSpace,
       seed: state.seed,
+      freeLabel: t("card.free"),
     });
   } catch (error) {
     if (error.name !== "PoolTooSmallError") throw error;
     state.cells = [];
     el("grid").replaceChildren();
     showError(
-      `„${pool.name}“ hat ${error.have} Begriffe, für ${state.cols} × ${state.rows} werden ` +
-        `${error.needed} gebraucht. Wähle ein kleineres Raster oder ergänze Begriffe.`,
+      t("error.poolTooSmall", {
+        pool: pool.name,
+        have: error.have,
+        needed: error.needed,
+        cols: state.cols,
+        rows: state.rows,
+      }),
     );
     setCardInfo();
     return;
@@ -194,7 +241,6 @@ function newCard({ seed = randomSeed(), keepMarks = false } = {}) {
 function renderGrid() {
   const grid = el("grid");
   grid.style.setProperty("--cols", state.cols);
-  grid.setAttribute("aria-rowcount", state.rows);
   grid.replaceChildren(
     ...state.cells.map((cell, index) => {
       const tile = document.createElement("button");
@@ -211,6 +257,7 @@ function renderGrid() {
       return tile;
     }),
   );
+  fitGrid();
 }
 
 function toggle(index) {
@@ -234,31 +281,82 @@ function updateBingo() {
 
   const status = el("status");
   if (full) {
-    status.textContent = "Volle Karte! 🎉";
+    status.textContent = t("status.full");
   } else if (lines.length) {
-    const names = lines.map((line) => `${line.type} ${line.nr}`).join(", ");
-    status.textContent = `BINGO! ${names}`;
+    const names = lines.map((line) => `${t(`line.${line.type}`)} ${line.nr}`).join(", ");
+    status.textContent = t("status.bingo", { lines: names });
+  } else if (state.cells.length) {
+    status.textContent = t("status.progress", {
+      done: state.marked.size,
+      total: state.cells.length,
+      open: state.cells.length - state.marked.size,
+    });
   } else {
-    const open = state.cells.length - state.marked.size;
-    status.textContent = state.cells.length ? `${state.marked.size} von ${state.cells.length} getroffen — noch ${open} offen` : "";
+    status.textContent = "";
   }
 }
 
 function setCardInfo() {
   const pool = currentPool();
   el("card-info").textContent = state.cells.length
-    ? `${pool.name} · ${state.cols} × ${state.rows} · Karte ${state.seed}`
-    : `${pool.name} · ${pool.terms.length} Begriffe`;
+    ? t("card.info", { pool: pool.name, cols: state.cols, rows: state.rows, seed: state.seed })
+    : t("card.infoShort", { pool: pool.name, count: pool.terms.length });
 }
 
 function showError(message) {
   const box = el("error");
   box.textContent = message;
   box.hidden = false;
+  fitGrid();
 }
 
 function hideError() {
   el("error").hidden = true;
+}
+
+// --- Kachelgröße ---------------------------------------------------------
+
+/**
+ * Höhe des Fensters abzüglich allem, was nicht die Karte ist. Bewusst aus den
+ * Geschwistern von <main> gerechnet und nicht aus dessen eigener Höhe — sonst würde
+ * eine größere Karte mehr Platz melden und sich selbst aufschaukeln.
+ */
+function availableHeight() {
+  const styles = getComputedStyle(document.body);
+  const gap = parseFloat(styles.rowGap) || 0;
+  const padding = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+
+  let used = 0;
+  let boxes = 0;
+  for (const node of document.body.children) {
+    const nodeStyles = getComputedStyle(node);
+    if (nodeStyles.display === "none" || nodeStyles.position === "absolute" || nodeStyles.position === "fixed") continue;
+    boxes += 1;
+    if (node.tagName !== "MAIN") used += node.offsetHeight;
+  }
+  return window.innerHeight - padding - used - gap * Math.max(0, boxes - 1);
+}
+
+/**
+ * Kacheln so groß, dass die Karte ins Fenster passt — begrenzt durch --cell-min und
+ * --cell-max aus dem Stylesheet. Passt sie bei Mindestgröße nicht, scrollt die Seite;
+ * ist das Fenster sehr schmal, gewinnt die Breite, damit nie quer gescrollt wird.
+ */
+function fitGrid() {
+  const grid = el("grid");
+  if (!state.cells.length) return;
+
+  const root = document.documentElement;
+  const rootStyles = getComputedStyle(root);
+  const min = parseFloat(rootStyles.getPropertyValue("--cell-min")) || 52;
+  const max = parseFloat(rootStyles.getPropertyValue("--cell-max")) || 148;
+  const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+
+  const byWidth = (grid.parentElement.clientWidth - (state.cols - 1) * gap) / state.cols;
+  const byHeight = (availableHeight() - (state.rows - 1) * gap) / state.rows;
+  const cell = Math.min(byWidth, max, Math.max(min, byHeight));
+
+  grid.style.setProperty("--cell", `${Math.max(1, Math.floor(cell))}px`);
 }
 
 // --- Bedienung -----------------------------------------------------------
@@ -273,7 +371,10 @@ function bindEvents() {
     state.themeId = event.target.value;
     applyTheme(currentTheme());
     store.lastSettings.set({ ...(store.lastSettings.get() || {}), themeId: state.themeId });
+    fitGrid();
   });
+
+  el("lang-select").addEventListener("change", (event) => changeLanguage(event.target.value));
 
   el("grid-select").addEventListener("change", (event) => {
     const [cols, rows] = event.target.value.split("x").map(Number);
@@ -303,8 +404,37 @@ function bindEvents() {
   bindThemeDialog();
   bindShareDialog();
 
+  let pending = 0;
+  window.addEventListener("resize", () => {
+    cancelAnimationFrame(pending);
+    pending = requestAnimationFrame(fitGrid);
+  });
+
   // Ein eingefügter Link im selben Tab soll die Karte des Links zeigen.
   window.addEventListener("hashchange", () => location.reload());
+}
+
+/** Sprachwechsel: Oberfläche, Auswahllisten und — wenn möglich — der Pool selbst. */
+function changeLanguage(code) {
+  setLocale(code);
+  translateDocument();
+
+  const pool = currentPool();
+  const twin = pool?.builtin && pool.topic
+    ? state.pools.find((p) => p.builtin && p.topic === pool.topic && p.language === locale())
+    : null;
+  if (twin && twin.id !== pool.id) state.poolId = twin.id;
+
+  fillLanguageSelect();
+  fillSelectors();
+  applyTheme(currentTheme());
+
+  if (twin && twin.id !== pool.id) newCard({ seed: state.seed });
+  else {
+    updateBingo();
+    setCardInfo();
+    fitGrid();
+  }
 }
 
 function exportPng() {
@@ -328,19 +458,21 @@ async function shareUrl(sameCard) {
   const theme = normalizeTheme(currentTheme());
   const config = {
     v: 1,
+    l: locale(),
     g: [state.cols, state.rows],
     f: state.freeSpace ? 1 : 0,
     p: pool.builtin ? { ref: pool.id } : { name: pool.name, terms: pool.terms },
-    t: theme.builtin ? { ref: theme.id } : { ...theme, id: undefined, builtin: undefined, shared: undefined },
+    t: currentTheme().builtin
+      ? { ref: currentTheme().id }
+      : { name: theme.name, title: theme.title, subtitle: theme.subtitle, logo: theme.logo, font: theme.font, colors: theme.colors, links: theme.links },
   };
   if (sameCard) config.s = state.seed;
   return buildShareUrl(config);
 }
 
 function openShare() {
-  const dialog = el("share-dialog");
   refreshShareUrl();
-  dialog.showModal();
+  el("share-dialog").showModal();
 }
 
 async function refreshShareUrl() {
@@ -354,12 +486,12 @@ function bindShareDialog() {
     const input = el("share-url");
     try {
       await navigator.clipboard.writeText(input.value);
-      el("share-copy").textContent = "Kopiert ✓";
+      el("share-copy").textContent = t("btn.copied");
     } catch {
       input.select(); // z. B. ohne HTTPS — dann kopiert man von Hand
-      el("share-copy").textContent = "Mit Strg+C kopieren";
+      el("share-copy").textContent = t("btn.copyManual");
     }
-    setTimeout(() => (el("share-copy").textContent = "Kopieren"), 2500);
+    setTimeout(() => (el("share-copy").textContent = t("btn.copy")), 2500);
   });
 }
 
@@ -367,7 +499,7 @@ function bindShareDialog() {
 
 function openPoolDialog() {
   const pool = currentPool();
-  el("pool-name").value = pool.builtin ? `${pool.name} (eigene Fassung)` : pool.name;
+  el("pool-name").value = pool.builtin ? t("pool.copySuffix", { name: pool.name }) : pool.name;
   el("pool-terms").value = pool.terms.join("\n");
   el("pool-delete").hidden = Boolean(pool.builtin);
   updatePoolCount();
@@ -375,17 +507,17 @@ function openPoolDialog() {
 }
 
 function updatePoolCount() {
-  const count = el("pool-terms").value.split("\n").map((t) => t.trim()).filter(Boolean).length;
+  const count = el("pool-terms").value.split("\n").map((term) => term.trim()).filter(Boolean).length;
   const needed = termsNeeded(state.cols, state.rows, state.freeSpace);
   el("pool-count").textContent =
-    `${count} Begriffe — für ${state.cols} × ${state.rows} werden ${needed} gebraucht` +
-    (count < needed ? " ⚠" : "");
+    t("pool.count", { count, needed, cols: state.cols, rows: state.rows }) + (count < needed ? " ⚠" : "");
 }
 
 function readPoolForm() {
   return {
-    name: el("pool-name").value.trim() || "Eigene Begriffe",
-    terms: [...new Set(el("pool-terms").value.split("\n").map((t) => t.trim()).filter(Boolean))],
+    name: el("pool-name").value.trim() || t("pool.default"),
+    terms: [...new Set(el("pool-terms").value.split("\n").map((term) => term.trim()).filter(Boolean))],
+    language: locale(),
   };
 }
 
@@ -414,7 +546,7 @@ function bindPoolDialog() {
     if (pool.builtin) return;
     store.customPools.remove(pool.id);
     state.pools = state.pools.filter((p) => p.id !== pool.id);
-    state.poolId = state.pools[0].id;
+    state.poolId = defaultPoolId();
     fillSelectors();
     el("pool-dialog").close();
     newCard();
@@ -422,7 +554,7 @@ function bindPoolDialog() {
 
   el("pool-export").addEventListener("click", () => {
     const form = readPoolForm();
-    downloadJson(`${slugFilename(form.name)}.json`, { ...form, language: "de" });
+    downloadJson(`${slugFilename(form.name)}.json`, form);
   });
 
   el("pool-import").addEventListener("click", () => el("pool-file").click());
@@ -451,15 +583,16 @@ function bindPoolDialog() {
 const COLOR_FIELDS = ["bg", "tile", "tileMarked", "text", "accent"];
 
 function openThemeDialog() {
-  const theme = normalizeTheme(currentTheme());
-  el("theme-name").value = theme.builtin ? `${theme.name} (eigene Fassung)` : theme.name;
+  const raw = currentTheme();
+  const theme = normalizeTheme(raw);
+  el("theme-name").value = raw.builtin ? t("pool.copySuffix", { name: theme.name }) : theme.name;
   el("theme-title").value = theme.title;
   el("theme-subtitle").value = theme.subtitle;
   el("theme-logo").value = theme.logo?.startsWith("data:") ? "" : theme.logo;
   el("theme-font").value = theme.font;
-  el("theme-links").value = theme.links.map((l) => `${l.label} | ${l.url}`).join("\n");
+  el("theme-links").value = theme.links.map((link) => `${link.label} | ${link.url}`).join("\n");
   for (const key of COLOR_FIELDS) el(`color-${key}`).value = theme.colors[key];
-  el("theme-delete").hidden = Boolean(theme.builtin);
+  el("theme-delete").hidden = Boolean(raw.builtin);
   el("theme-dialog").dataset.logo = theme.logo || "";
   el("theme-dialog").showModal();
 }
@@ -473,7 +606,7 @@ function readThemeForm() {
     .map(([label, url]) => ({ label, url }));
 
   return {
-    name: el("theme-name").value.trim() || "Eigenes Branding",
+    name: el("theme-name").value.trim() || t("theme.default"),
     title: el("theme-title").value.trim(),
     subtitle: el("theme-subtitle").value.trim(),
     logo: el("theme-logo").value.trim() || el("theme-dialog").dataset.logo || "",
@@ -490,7 +623,7 @@ function bindThemeDialog() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size > 300 * 1024) {
-      alert("Bitte ein Logo unter 300 KB wählen — größere Bilder machen den Teilen-Link unbrauchbar lang.");
+      alert(t("error.logoTooBig"));
       event.target.value = "";
       return;
     }
@@ -510,22 +643,24 @@ function bindThemeDialog() {
       : { ...form, id: current.id };
 
     store.customThemes.save(theme);
-    state.themes = [...state.themes.filter((t) => t.id !== theme.id), theme];
+    state.themes = [...state.themes.filter((entry) => entry.id !== theme.id), theme];
     state.themeId = theme.id;
     fillSelectors();
     applyTheme(theme);
     el("theme-dialog").close();
+    fitGrid();
   });
 
   el("theme-delete").addEventListener("click", () => {
     const theme = currentTheme();
     if (theme.builtin) return;
     store.customThemes.remove(theme.id);
-    state.themes = state.themes.filter((t) => t.id !== theme.id);
+    state.themes = state.themes.filter((entry) => entry.id !== theme.id);
     state.themeId = state.themes[0].id;
     fillSelectors();
     applyTheme(currentTheme());
     el("theme-dialog").close();
+    fitGrid();
   });
 
   el("theme-export").addEventListener("click", () => {
@@ -543,12 +678,12 @@ function bindThemeDialog() {
       el("theme-title").value = theme.title;
       el("theme-subtitle").value = theme.subtitle;
       el("theme-font").value = theme.font;
-      el("theme-links").value = theme.links.map((l) => `${l.label} | ${l.url}`).join("\n");
+      el("theme-links").value = theme.links.map((link) => `${link.label} | ${link.url}`).join("\n");
       el("theme-dialog").dataset.logo = theme.logo || "";
       el("theme-logo").value = theme.logo?.startsWith("data:") ? "" : theme.logo;
       for (const key of COLOR_FIELDS) el(`color-${key}`).value = theme.colors[key];
     } catch {
-      alert("Diese Datei ließ sich nicht als Theme lesen.");
+      alert(t("error.themeFile"));
     }
     event.target.value = "";
   });
@@ -572,5 +707,5 @@ function downloadJson(filename, value) {
 
 init().catch((error) => {
   console.error(error);
-  showError("Die Anwendung konnte nicht starten. Details stehen in der Browser-Konsole.");
+  showError(t("error.start"));
 });

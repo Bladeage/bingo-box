@@ -15,6 +15,7 @@ import {
 } from "../assets/card.js";
 import { decodeConfig, encodeConfig } from "../assets/share.js";
 import { deriveColors, normalizeTheme, readableOn } from "../assets/theme.js";
+import { LANGUAGES, isSupported, setLocale, t, translationKeys } from "../assets/i18n.js";
 
 const terms = Array.from({ length: 60 }, (_, i) => `Begriff ${i + 1}`);
 const texts = (cells) => cells.map((c) => c.text);
@@ -73,9 +74,9 @@ test("Gewinnlinien: Diagonalen nur bei quadratischer Karte", () => {
 });
 
 test("Bingo wird für Reihe, Spalte, Diagonale und volle Karte erkannt", () => {
-  assert.equal(findBingos(new Set([0, 1, 2, 3, 4]), 5, 5).lines[0].type, "Reihe");
-  assert.equal(findBingos(new Set([0, 5, 10, 15, 20]), 5, 5).lines[0].type, "Spalte");
-  assert.equal(findBingos(new Set([0, 6, 12, 18, 24]), 5, 5).lines[0].type, "Diagonale");
+  assert.equal(findBingos(new Set([0, 1, 2, 3, 4]), 5, 5).lines[0].type, "row");
+  assert.equal(findBingos(new Set([0, 5, 10, 15, 20]), 5, 5).lines[0].type, "column");
+  assert.equal(findBingos(new Set([0, 6, 12, 18, 24]), 5, 5).lines[0].type, "diagonal");
   assert.equal(findBingos(new Set([0, 1, 2]), 5, 5).lines.length, 0);
 
   const alles = new Set(Array.from({ length: 25 }, (_, i) => i));
@@ -130,6 +131,25 @@ test("Textfarbe richtet sich nach der Helligkeit des Untergrunds", () => {
   assert.equal(readableOn("#c0392b"), "#ffffff");
 });
 
+test("jede Sprache kennt genau dieselben Textbausteine", () => {
+  const reference = translationKeys(LANGUAGES[0].code).sort();
+  for (const { code } of LANGUAGES.slice(1)) {
+    assert.deepEqual(translationKeys(code).sort(), reference, `Sprache ${code} weicht ab`);
+  }
+});
+
+test("Platzhalter werden ersetzt, unbekannte Sprache fällt zurück", () => {
+  setLocale("en", { remember: false });
+  assert.equal(t("card.info", { pool: "P", cols: 5, rows: 6, seed: "abc" }), "P · 5 × 6 · Card abc");
+  setLocale("de", { remember: false });
+  assert.equal(t("card.info", { pool: "P", cols: 5, rows: 6, seed: "abc" }), "P · 5 × 6 · Karte abc");
+
+  setLocale("klingon", { remember: false });
+  assert.equal(isSupported("klingon"), false);
+  assert.equal(t("status.full"), "Volle Karte! 🎉"); // Rückfall auf Deutsch
+  assert.equal(t("gibt.es.nicht"), "gibt.es.nicht"); // fehlender Schlüssel bleibt sichtbar
+});
+
 test("mitgelieferte Pools sind gültig und groß genug für 5 × 6", async () => {
   const catalog = JSON.parse(await readFile(new URL("../pools/index.json", import.meta.url)));
   const files = (await readdir(new URL("../pools/", import.meta.url))).filter((f) => f !== "index.json");
@@ -138,17 +158,34 @@ test("mitgelieferte Pools sind gültig und groß genug für 5 × 6", async () =>
   for (const entry of catalog) {
     const pool = JSON.parse(await readFile(new URL(`../pools/${entry.file}`, import.meta.url)));
     assert.equal(pool.id, entry.id, `${entry.file}: id passt nicht zum Katalog`);
+    assert.ok(isSupported(entry.language), `${entry.file}: Sprache ${entry.language} unbekannt`);
+    assert.equal(pool.language, entry.language, `${entry.file}: Sprache passt nicht zum Katalog`);
+    assert.ok(entry.topic, `${entry.file}: kein Thema im Katalog`);
     assert.ok(pool.terms.length >= 30, `${entry.file}: nur ${pool.terms.length} Begriffe`);
     assert.equal(new Set(pool.terms).size, pool.terms.length, `${entry.file}: doppelte Begriffe`);
-    assert.ok(pool.terms.every((t) => typeof t === "string" && t.trim()), `${entry.file}: leerer Begriff`);
+    assert.ok(pool.terms.every((term) => typeof term === "string" && term.trim()), `${entry.file}: leerer Begriff`);
+  }
+});
+
+test("jedes Thema gibt es in jeder Sprache", async () => {
+  const catalog = JSON.parse(await readFile(new URL("../pools/index.json", import.meta.url)));
+  const topics = [...new Set(catalog.map((entry) => entry.topic))];
+  for (const { code } of LANGUAGES) {
+    const available = catalog.filter((entry) => entry.language === code).map((entry) => entry.topic);
+    assert.deepEqual(available.sort(), [...topics].sort(), `Sprache ${code} fehlt ein Thema`);
   }
 });
 
 test("mitgelieferte Themes sind gültig", async () => {
   const catalog = JSON.parse(await readFile(new URL("../themes/index.json", import.meta.url)));
   for (const entry of catalog) {
-    const theme = normalizeTheme(JSON.parse(await readFile(new URL(`../themes/${entry.file}`, import.meta.url))));
+    const raw = JSON.parse(await readFile(new URL(`../themes/${entry.file}`, import.meta.url)));
+    assert.ok(raw.nameKey, `${entry.file}: kein nameKey`);
+    assert.ok(translationKeys("de").includes(raw.nameKey), `${entry.file}: ${raw.nameKey} ist nicht übersetzt`);
+
+    const theme = normalizeTheme(raw);
     assert.equal(theme.id, entry.id);
+    assert.ok(theme.name && theme.name !== raw.nameKey, `${entry.file}: Name wurde nicht aufgelöst`);
     for (const [key, value] of Object.entries(theme.colors)) {
       assert.match(value, /^#[0-9a-fA-F]{6}$/, `${entry.file}: ${key} = ${value}`);
     }

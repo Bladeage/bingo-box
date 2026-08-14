@@ -1,9 +1,6 @@
 {
   "id": "papier",
-  "name": "Papier",
-  "title": "Bingo Box",
-  "subtitle": "Hell, ruhig und zum Ausdrucken geeignet.",
-  "logo": "",
+  "nameKey": "theme.paper",
   "font": "serif",
   "colors": {
     "bg": "#f6f4ee",
@@ -14,6 +11,5 @@
     "textMuted": "#6d675c",
     "accent": "#1b6b4c",
     "line": "#d9d3c5"
-  },
-  "links": []
+  }
 }

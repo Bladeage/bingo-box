@@ -1,6 +1,11 @@
 [
-  { "id": "meeting.de", "name": "Meeting-Bingo", "file": "meeting.de.json" },
-  { "id": "games-showcase.de", "name": "Games-Showcase", "file": "games-showcase.de.json" },
-  { "id": "fussball.de", "name": "Fußball-Kommentar", "file": "fussball.de.json" },
-  { "id": "krimi.de", "name": "Krimi-Sonntag", "file": "krimi.de.json" }
+  { "id": "meeting.de", "topic": "meeting", "language": "de", "file": "meeting.de.json" },
+  { "id": "games-showcase.de", "topic": "games-showcase", "language": "de", "file": "games-showcase.de.json" },
+  { "id": "fussball.de", "topic": "football", "language": "de", "file": "fussball.de.json" },
+  { "id": "krimi.de", "topic": "crime", "language": "de", "file": "krimi.de.json" },
+
+  { "id": "meeting.en", "topic": "meeting", "language": "en", "file": "meeting.en.json" },
+  { "id": "games-showcase.en", "topic": "games-showcase", "language": "en", "file": "games-showcase.en.json" },
+  { "id": "football.en", "topic": "football", "language": "en", "file": "football.en.json" },
+  { "id": "crime-drama.en", "topic": "crime", "language": "en", "file": "crime-drama.en.json" }
 ]

@@ -1,7 +1,7 @@
 {
   "name": "bingo-box",
   "version": "1.0.0",
-  "description": "Bingo-Karten für jeden Anlass — eigene Begriffe, eigenes Branding, ein Link für alle.",
+  "description": "Bingo cards for any occasion — your own terms, your own branding, one link for everyone.",
   "type": "module",
   "private": true,
   "license": "MIT",

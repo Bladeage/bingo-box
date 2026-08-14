@@ -40,7 +40,9 @@ export async function loadBundled(kind) {
   const entries = await Promise.all(
     catalog.map(async (entry) => {
       try {
-        return { ...(await fetchJson(`${kind}/${entry.file}`)), id: entry.id, builtin: true };
+        const loaded = await fetchJson(`${kind}/${entry.file}`);
+        // Der Katalog ist die Wahrheit für id, Sprache und Thema — die Datei liefert den Inhalt.
+        return { ...loaded, id: entry.id, language: entry.language ?? loaded.language, topic: entry.topic, builtin: true };
       } catch (error) {
         console.warn(`${kind}/${entry.file} konnte nicht geladen werden`, error);
         return null;

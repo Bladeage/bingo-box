@@ -15,6 +15,13 @@
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --radius: 14px;
   --cols: 5;
+  --rows: 5;
+  /* Kachelgröße: app.js rechnet sie aus Fensterbreite und -höhe aus und hält sie
+     zwischen diesen Grenzen. Hier ändern, nicht im JavaScript. */
+  --cell-min: 52px;
+  --cell-max: 148px;
+  --cell: 7rem;
+  --grid-gap: clamp(0.3rem, 0.8vw, 0.7rem);
 }
 
 * {
@@ -182,23 +189,30 @@ input[type="color"] {
 }
 
 /* --- Karte --- */
+/* main bekommt die Resthöhe des Fensters; die Karte wird darin zentriert und so
+   bemessen, dass sie ohne Scrollen hineinpasst. */
 main {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  gap: clamp(0.3rem, 0.8vw, 0.7rem);
+  grid-template-columns: repeat(var(--cols), var(--cell));
+  grid-auto-rows: var(--cell);
+  justify-content: center;
+  gap: var(--grid-gap);
 }
 .tile {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  aspect-ratio: 1;
   padding: 0.5rem;
   font: inherit;
-  font-size: clamp(0.6rem, 0.35rem + 0.75vw, 1rem);
+  font-size: clamp(0.58rem, calc(var(--cell) * 0.115), 1.05rem);
   font-weight: 600;
   color: var(--c-text);
   background: var(--c-tile);

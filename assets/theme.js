@@ -1,6 +1,10 @@
 // Branding: Farben, Schrift, Titel, Logo und Fußzeilen-Links kommen aus einem
 // einfachen Objekt und landen als CSS-Variablen im Dokument.
 
+import { t } from "./i18n.js";
+
+export const APP_NAME = "Bingo Box";
+
 export const FONT_STACKS = {
   system: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   serif: "'Iowan Old Style', Georgia, 'Times New Roman', serif",
@@ -8,11 +12,13 @@ export const FONT_STACKS = {
   rounded: "'Nunito', 'Trebuchet MS', system-ui, sans-serif",
 };
 
+// Titel, Unterzeile und Name werden erst beim Normalisieren gesetzt — sie hängen
+// an der Oberflächensprache, die sich zur Laufzeit ändern kann.
 export const DEFAULT_THEME = {
   id: "standard",
-  name: "Standard",
-  title: "Bingo Box",
-  subtitle: "Eigene Begriffe, eigenes Aussehen, ein Link für alle.",
+  name: "",
+  title: APP_NAME,
+  subtitle: "",
   logo: "",
   font: "system",
   colors: {
@@ -74,44 +80,49 @@ export function normalizeTheme(theme) {
   merged.colors = { ...DEFAULT_THEME.colors, ...(theme?.colors || {}) };
   merged.links = Array.isArray(theme?.links) ? theme.links.filter((l) => l && l.url && l.label) : [];
   if (!FONT_STACKS[merged.font]) merged.font = "system";
+
+  // Mitgelieferte Themes tragen nur einen Schlüssel und heißen in jeder Sprache anders.
+  merged.name = theme?.nameKey ? t(theme.nameKey) : theme?.name || t("theme.default");
+  merged.title = theme?.title ?? APP_NAME;
+  merged.subtitle = theme?.subtitle ?? t("app.tagline");
   return merged;
 }
 
 export function applyTheme(theme, { root = document.documentElement } = {}) {
-  const t = normalizeTheme(theme);
-  for (const [key, value] of Object.entries(t.colors)) {
+  const brand = normalizeTheme(theme);
+  for (const [key, value] of Object.entries(brand.colors)) {
     root.style.setProperty(`--c-${key}`, value);
   }
-  root.style.setProperty("--c-accentText", readableOn(t.colors.accent));
-  root.style.setProperty("--c-markedText", readableOn(t.colors.tileMarked));
+  root.style.setProperty("--c-accentText", readableOn(brand.colors.accent));
+  root.style.setProperty("--c-markedText", readableOn(brand.colors.tileMarked));
   // Warnrot muss auf hellem wie dunklem Grund lesbar bleiben.
-  root.style.setProperty("--c-danger", readableOn(t.colors.bg) === "#101010" ? "#c92a2a" : "#ff8787");
-  root.style.setProperty("--font-body", FONT_STACKS[t.font]);
+  root.style.setProperty("--c-danger", readableOn(brand.colors.bg) === "#101010" ? "#c92a2a" : "#ff8787");
+  root.style.setProperty("--font-body", FONT_STACKS[brand.font]);
 
-  document.title = t.title ? `${t.title} — Bingo` : "Bingo Box";
+  document.title = brand.title && brand.title !== APP_NAME ? `${brand.title} — ${APP_NAME}` : APP_NAME;
 
   const titleEl = document.getElementById("brand-title");
   const subtitleEl = document.getElementById("brand-subtitle");
   const logoEl = document.getElementById("brand-logo");
   const linksEl = document.getElementById("brand-links");
 
-  if (titleEl) titleEl.textContent = t.title;
+  if (titleEl) titleEl.textContent = brand.title;
   if (subtitleEl) {
-    subtitleEl.textContent = t.subtitle;
-    subtitleEl.hidden = !t.subtitle;
+    subtitleEl.textContent = brand.subtitle;
+    subtitleEl.hidden = !brand.subtitle;
   }
   if (logoEl) {
-    logoEl.hidden = !t.logo;
-    if (t.logo) {
-      logoEl.src = t.logo;
-      logoEl.alt = t.title ? `Logo ${t.title}` : "Logo";
+    logoEl.hidden = !brand.logo;
+    if (brand.logo) {
+      logoEl.src = brand.logo;
+      logoEl.alt = brand.title ? `Logo ${brand.title}` : "Logo";
     } else {
       logoEl.removeAttribute("src");
     }
   }
   if (linksEl) {
     linksEl.replaceChildren(
-      ...t.links.map(({ label, url }) => {
+      ...brand.links.map(({ label, url }) => {
         const a = document.createElement("a");
         a.href = url;
         a.textContent = label;
@@ -121,5 +132,5 @@ export function applyTheme(theme, { root = document.documentElement } = {}) {
       }),
     );
   }
-  return t;
+  return brand;
 }

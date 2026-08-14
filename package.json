@@ -1,0 +1,15 @@
+{
+  "name": "bingo-box",
+  "version": "1.0.0",
+  "description": "Bingo-Karten für jeden Anlass — eigene Begriffe, eigenes Branding, ein Link für alle.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/logic.test.js",
+    "test:browser": "node test/browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.0"
+  }
+}

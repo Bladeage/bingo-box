@@ -1,0 +1,354 @@
+/* Die Farben kommen aus dem Theme (assets/theme.js) und werden hier nur benutzt.
+   Die Werte unten sind der Stand vor dem ersten Rendern. */
+:root {
+  --c-bg: #12141c;
+  --c-surface: #1c1f2b;
+  --c-tile: #252a39;
+  --c-tileMarked: #3b5bdb;
+  --c-text: #f1f3f7;
+  --c-textMuted: #9aa3b8;
+  --c-accent: #63e6be;
+  --c-line: #333a4d;
+  --c-accentText: #0b0d12;
+  --c-markedText: #ffffff;
+  --c-danger: #ff8787;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 14px;
+  --cols: 5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: clamp(0.75rem, 2vw, 2rem);
+  min-height: 100vh;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+a {
+  color: var(--c-accent);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  padding: 0.5rem 0.75rem;
+  background: var(--c-surface);
+  border-radius: var(--radius);
+}
+
+/* --- Kopf --- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.brand__logo {
+  max-height: 68px;
+  max-width: 240px;
+  object-fit: contain;
+}
+.brand h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 1rem + 2vw, 2.4rem);
+  letter-spacing: -0.02em;
+}
+.brand__subtitle {
+  margin: 0.15rem 0 0;
+  color: var(--c-textMuted);
+}
+
+/* --- Werkzeugleiste --- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  padding: 1rem;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.field label {
+  font-size: 0.8rem;
+  color: var(--c-textMuted);
+}
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: center;
+}
+.field--check label,
+.field--check span {
+  font-size: 0.9rem;
+  color: var(--c-text);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+select,
+input[type="text"],
+input[type="url"],
+textarea {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.6rem;
+  color: var(--c-text);
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  max-width: 100%;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+}
+input[type="color"] {
+  width: 3rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: none;
+}
+
+.btn {
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0.5rem 0.9rem;
+  color: var(--c-text);
+  background: var(--c-tile);
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--c-accent);
+}
+.btn--primary {
+  background: var(--c-accent);
+  color: var(--c-accentText);
+  border-color: transparent;
+  font-weight: 600;
+}
+.btn--danger {
+  color: var(--c-danger);
+}
+:focus-visible {
+  outline: 3px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* --- Meldungen --- */
+.status,
+.error {
+  margin: 0;
+  min-height: 1.4em;
+  font-weight: 600;
+}
+.status {
+  color: var(--c-accent);
+}
+.error {
+  color: var(--c-danger);
+  font-weight: 500;
+}
+
+/* --- Karte --- */
+main {
+  flex: 1;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: clamp(0.3rem, 0.8vw, 0.7rem);
+}
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  aspect-ratio: 1;
+  padding: 0.5rem;
+  font: inherit;
+  font-size: clamp(0.6rem, 0.35rem + 0.75vw, 1rem);
+  font-weight: 600;
+  color: var(--c-text);
+  background: var(--c-tile);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  transition: background-color 0.12s ease, transform 0.12s ease;
+}
+.tile:hover {
+  border-color: var(--c-accent);
+}
+.tile[aria-pressed="true"] {
+  background: var(--c-tileMarked);
+  color: var(--c-markedText);
+  border-color: transparent;
+}
+.tile--free {
+  font-style: italic;
+}
+.tile--winning {
+  outline: 3px solid var(--c-accent);
+  outline-offset: -3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none;
+  }
+}
+
+/* --- Fuß --- */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--c-line);
+  color: var(--c-textMuted);
+  font-size: 0.85rem;
+}
+.footer p {
+  margin: 0;
+}
+.brand-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.colophon {
+  margin-left: auto;
+}
+
+/* --- Dialoge --- */
+.dialog {
+  width: min(46rem, 94vw);
+  padding: 0;
+  color: var(--c-text);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+}
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+.dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.dialog h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.spacer {
+  flex: 1;
+}
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--c-textMuted);
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.9rem;
+}
+.colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+}
+.colors legend {
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  color: var(--c-textMuted);
+}
+.colors label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .actions .btn {
+    flex: 1 1 auto;
+  }
+  .colophon {
+    margin-left: 0;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .toolbar,
+  .actions,
+  .status,
+  .colophon,
+  .skip-link {
+    display: none;
+  }
+  .tile {
+    background: #fff;
+    color: #000;
+    border: 1.5px solid #000;
+  }
+  .tile[aria-pressed="true"] {
+    background: #ddd;
+    color: #000;
+  }
+}

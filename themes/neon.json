@@ -1,0 +1,19 @@
+{
+  "id": "neon",
+  "name": "Neon",
+  "title": "Bingo Box",
+  "subtitle": "Kräftige Farben für Stream-Overlays und den zweiten Bildschirm.",
+  "logo": "",
+  "font": "mono",
+  "colors": {
+    "bg": "#0b0f14",
+    "surface": "#131b24",
+    "tile": "#182430",
+    "tileMarked": "#ff2e88",
+    "text": "#eafcff",
+    "textMuted": "#7fa8b8",
+    "accent": "#3ef2d0",
+    "line": "#24384a"
+  },
+  "links": []
+}

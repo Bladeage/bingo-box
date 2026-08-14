@@ -1,0 +1,19 @@
+{
+  "id": "mitternacht",
+  "name": "Mitternacht",
+  "title": "Bingo Box",
+  "subtitle": "Eigene Begriffe, eigenes Aussehen, ein Link für alle.",
+  "logo": "",
+  "font": "system",
+  "colors": {
+    "bg": "#12141c",
+    "surface": "#1c1f2b",
+    "tile": "#252a39",
+    "tileMarked": "#3b5bdb",
+    "text": "#f1f3f7",
+    "textMuted": "#9aa3b8",
+    "accent": "#63e6be",
+    "line": "#333a4d"
+  },
+  "links": []
+}

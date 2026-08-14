@@ -1,0 +1,6 @@
+[
+  { "id": "meeting.de", "name": "Meeting-Bingo", "file": "meeting.de.json" },
+  { "id": "games-showcase.de", "name": "Games-Showcase", "file": "games-showcase.de.json" },
+  { "id": "fussball.de", "name": "Fußball-Kommentar", "file": "fussball.de.json" },
+  { "id": "krimi.de", "name": "Krimi-Sonntag", "file": "krimi.de.json" }
+]

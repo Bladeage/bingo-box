@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bingo Box</title>
+    <meta
+      name="description"
+      content="Bingo-Karten für jeden Anlass: eigene Begriffe, eigenes Branding, ein Link für alle. Läuft komplett im Browser."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#karte">Direkt zur Karte</a>
+
+    <header class="brand">
+      <img id="brand-logo" class="brand__logo" alt="" hidden />
+      <div class="brand__text">
+        <h1 id="brand-title">Bingo Box</h1>
+        <p id="brand-subtitle" class="brand__subtitle"></p>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="Karte einstellen">
+      <div class="field">
+        <label for="pool-select">Begriffe</label>
+        <select id="pool-select"></select>
+      </div>
+      <div class="field">
+        <label for="theme-select">Aussehen</label>
+        <select id="theme-select"></select>
+      </div>
+      <div class="field">
+        <label for="grid-select">Raster</label>
+        <select id="grid-select">
+          <option value="3x3">3 × 3</option>
+          <option value="4x4">4 × 4</option>
+          <option value="5x5" selected>5 × 5</option>
+          <option value="5x6">5 × 6</option>
+        </select>
+      </div>
+      <div class="field field--check">
+        <input type="checkbox" id="free-space" />
+        <label for="free-space">Freifeld in der Mitte</label>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="btn-new" class="btn btn--primary">Neue Karte</button>
+        <button type="button" id="btn-share" class="btn">Teilen</button>
+        <button type="button" id="btn-png" class="btn">Als Bild</button>
+        <button type="button" id="btn-pool" class="btn">Begriffe bearbeiten</button>
+        <button type="button" id="btn-theme" class="btn">Branding</button>
+      </div>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+
+    <main id="karte">
+      <div id="grid" class="grid" role="group" aria-label="Bingo-Karte"></div>
+    </main>
+
+    <footer class="footer">
+      <p id="card-info" class="card-info"></p>
+      <nav id="brand-links" class="brand-links" aria-label="Links"></nav>
+      <p class="colophon">
+        Läuft ohne Server, ohne Konto, ohne Tracking —
+        <a href="https://github.com/Bladeage/bingo-box">Quellcode &amp; eigene Pools</a>
+      </p>
+    </footer>
+
+    <!-- Begriffe bearbeiten -->
+    <dialog id="pool-dialog" class="dialog">
+      <form method="dialog" class="dialog__body">
+        <h2>Begriffe</h2>
+        <div class="field">
+          <label for="pool-name">Name des Pools</label>
+          <input type="text" id="pool-name" required maxlength="60" />
+        </div>
+        <div class="field">
+          <label for="pool-terms">Ein Begriff pro Zeile</label>
+          <textarea id="pool-terms" rows="14" spellcheck="true"></textarea>
+          <p id="pool-count" class="hint"></p>
+        </div>
+        <div class="dialog__actions">
+          <button type="button" id="pool-import" class="btn">Datei laden</button>
+          <button type="button" id="pool-export" class="btn">Als Datei sichern</button>
+          <button type="button" id="pool-delete" class="btn btn--danger">Löschen</button>
+          <span class="spacer"></span>
+          <button type="button" id="pool-cancel" class="btn">Abbrechen</button>
+          <button type="button" id="pool-save" class="btn btn--primary">Übernehmen</button>
+        </div>
+        <input type="file" id="pool-file" accept="application/json,.json,.txt" hidden />
+      </form>
+    </dialog>
+
+    <!-- Branding -->
+    <dialog id="theme-dialog" class="dialog">
+      <form method="dialog" class="dialog__body">
+        <h2>Branding</h2>
+        <div class="field">
+          <label for="theme-name">Name des Themes</label>
+          <input type="text" id="theme-name" required maxlength="60" />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="theme-title">Überschrift</label>
+            <input type="text" id="theme-title" maxlength="80" />
+          </div>
+          <div class="field">
+            <label for="theme-subtitle">Unterzeile</label>
+            <input type="text" id="theme-subtitle" maxlength="140" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="theme-logo">Logo (URL)</label>
+            <input type="url" id="theme-logo" placeholder="https://…" />
+          </div>
+          <div class="field">
+            <label for="theme-logo-file">…oder Bilddatei</label>
+            <input type="file" id="theme-logo-file" accept="image/*" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="theme-font">Schrift</label>
+          <select id="theme-font">
+            <option value="system">Serifenlos</option>
+            <option value="serif">Serif</option>
+            <option value="mono">Monospace</option>
+            <option value="rounded">Rund</option>
+          </select>
+        </div>
+        <fieldset class="colors">
+          <legend>Farben</legend>
+          <label>Hintergrund <input type="color" id="color-bg" /></label>
+          <label>Kachel <input type="color" id="color-tile" /></label>
+          <label>Treffer <input type="color" id="color-tileMarked" /></label>
+          <label>Text <input type="color" id="color-text" /></label>
+          <label>Akzent <input type="color" id="color-accent" /></label>
+        </fieldset>
+        <div class="field">
+          <label for="theme-links">Fußzeilen-Links — je Zeile <code>Beschriftung | https://…</code></label>
+          <textarea id="theme-links" rows="3"></textarea>
+        </div>
+        <div class="dialog__actions">
+          <button type="button" id="theme-import" class="btn">Datei laden</button>
+          <button type="button" id="theme-export" class="btn">Als Datei sichern</button>
+          <button type="button" id="theme-delete" class="btn btn--danger">Löschen</button>
+          <span class="spacer"></span>
+          <button type="button" id="theme-cancel" class="btn">Abbrechen</button>
+          <button type="button" id="theme-save" class="btn btn--primary">Übernehmen</button>
+        </div>
+        <input type="file" id="theme-file" accept="application/json,.json" hidden />
+      </form>
+    </dialog>
+
+    <!-- Teilen -->
+    <dialog id="share-dialog" class="dialog">
+      <form method="dialog" class="dialog__body">
+        <h2>Teilen</h2>
+        <p class="hint">
+          Der Link enthält Begriffe, Branding und die Kartennummer. Wer ihn öffnet, bekommt
+          <strong>genau dieselbe Karte</strong>. Nichts davon wird an einen Server geschickt.
+        </p>
+        <div class="field">
+          <label for="share-url">Link</label>
+          <input type="text" id="share-url" readonly />
+        </div>
+        <label class="field field--check">
+          <input type="checkbox" id="share-same-card" checked />
+          <span>Alle bekommen dieselbe Karte (sonst würfelt jeder neu)</span>
+        </label>
+        <div class="dialog__actions">
+          <span class="spacer"></span>
+          <button type="button" id="share-close" class="btn">Schließen</button>
+          <button type="button" id="share-copy" class="btn btn--primary">Kopieren</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="assets/app.js"></script>
+  </body>
+</html>

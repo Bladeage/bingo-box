@@ -10,6 +10,7 @@ import { downloadCanvas, renderCardCanvas } from "./export.js";
 import { detectLocale, isSupported, LANGUAGES, locale, setLocale, t, translateDocument } from "./i18n.js";
 
 const el = (id) => document.getElementById(id);
+const TOOLBAR_KEY = "bingobox.toolbar";
 
 const state = {
   pools: [],
@@ -247,6 +248,7 @@ function renderGrid() {
       tile.type = "button";
       tile.className = `tile${cell.free ? " tile--free" : ""}`;
       tile.textContent = cell.text;
+      tile.style.setProperty("--font-scale", fontScale(cell.text));
       tile.dataset.index = String(index);
       tile.setAttribute("aria-pressed", String(state.marked.has(index)));
       if (cell.free) {
@@ -326,6 +328,9 @@ function availableHeight() {
   const gap = parseFloat(styles.rowGap) || 0;
   const padding = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
 
+  // Flaches Querformat (styles.css): Werkzeuge stehen seitlich, der Karte gehört die ganze Höhe.
+  if (styles.getPropertyValue("--layout").trim() === "side") return window.innerHeight - padding;
+
   let used = 0;
   let boxes = 0;
   for (const node of document.body.children) {
@@ -356,7 +361,42 @@ function fitGrid() {
   const byHeight = (availableHeight() - (state.rows - 1) * gap) / state.rows;
   const cell = Math.min(byWidth, max, Math.max(min, byHeight));
 
-  grid.style.setProperty("--cell", `${Math.max(1, Math.floor(cell))}px`);
+  // Nur bei Änderung schreiben — der ResizeObserver unten meldet sich sonst im Kreis.
+  const next = `${Math.max(1, Math.floor(cell))}px`;
+  if (grid.style.getPropertyValue("--cell") !== next) grid.style.setProperty("--cell", next);
+}
+
+/**
+ * Schriftskala je Kachel (Anteil an --cell): kurze Begriffe groß, lange klein und
+ * mehrzeilig. Ein einzelnes Bandwurmwort muss in die Breite passen, sonst bricht es
+ * mitten im Wort um.
+ */
+function fontScale(text) {
+  const length = text.length;
+  const longest = Math.max(...text.split(/\s+/).map((word) => word.length));
+  const byLength = length <= 6 ? 0.17 : length <= 12 ? 0.14 : length <= 20 ? 0.12 : length <= 32 ? 0.105 : 0.09;
+  return Math.max(0.075, Math.min(byLength, 1.25 / longest)).toFixed(3);
+}
+
+/**
+ * Alles, was die verfügbare Fläche ändert, löst eine Neuberechnung aus: Fenster,
+ * Drehung, mobile Adressleiste (visualViewport) und Höhenänderungen der Nachbarn
+ * der Karte (Werkzeugleiste auf/zu, Fehlermeldung, Theme mit Logo).
+ */
+function watchLayout() {
+  let pending = 0;
+  const schedule = () => {
+    cancelAnimationFrame(pending);
+    pending = requestAnimationFrame(fitGrid);
+  };
+  window.addEventListener("resize", schedule);
+  window.addEventListener("orientationchange", schedule);
+  window.visualViewport?.addEventListener("resize", schedule);
+
+  if (typeof ResizeObserver === "function") {
+    const observer = new ResizeObserver(schedule);
+    for (const node of document.body.children) observer.observe(node);
+  }
 }
 
 // --- Bedienung -----------------------------------------------------------
@@ -403,15 +443,55 @@ function bindEvents() {
   bindPoolDialog();
   bindThemeDialog();
   bindShareDialog();
+  bindGridKeys();
+  watchLayout();
 
-  let pending = 0;
-  window.addEventListener("resize", () => {
-    cancelAnimationFrame(pending);
-    pending = requestAnimationFrame(fitGrid);
-  });
+  // Kleine Schirme: Einstellungen auf- und zuklappen (auf breiten Schirmen ohne Wirkung).
+  // Zugeklappt bleibt gemerkt — wer am Handy spielt, will die Karte, nicht die Leiste.
+  const toolbar = el("btn-settings").closest(".toolbar");
+  const setSettingsOpen = (open) => {
+    toolbar.classList.toggle("toolbar--open", open);
+    el("btn-settings").setAttribute("aria-expanded", String(open));
+    try {
+      localStorage.setItem(TOOLBAR_KEY, open ? "open" : "closed");
+    } catch {
+      // privater Modus — dann gilt die Wahl nur bis zum Neuladen
+    }
+  };
+  try {
+    if (localStorage.getItem(TOOLBAR_KEY) === "closed") setSettingsOpen(false);
+  } catch {
+    // ohne Speicher bleibt die Leiste offen
+  }
+  el("btn-settings").addEventListener("click", () => setSettingsOpen(!toolbar.classList.contains("toolbar--open")));
 
   // Ein eingefügter Link im selben Tab soll die Karte des Links zeigen.
   window.addEventListener("hashchange", () => location.reload());
+}
+
+/** Pfeiltasten wandern über die Karte, Pos1/Ende springen an Zeilenanfang und -ende. */
+function bindGridKeys() {
+  const grid = el("grid");
+  grid.addEventListener("keydown", (event) => {
+    const from = Number(event.target.dataset?.index);
+    if (Number.isNaN(from)) return;
+    const row = Math.floor(from / state.cols) * state.cols;
+    const target = {
+      ArrowRight: from + 1,
+      ArrowLeft: from - 1,
+      ArrowDown: from + state.cols,
+      ArrowUp: from - state.cols,
+      Home: row,
+      End: row + state.cols - 1,
+    }[event.key];
+    if (target === undefined) return;
+    event.preventDefault();
+    // Ein gesperrtes Freifeld nimmt keinen Fokus: dahinter weitersuchen.
+    const step = Math.sign(target - from) || 1;
+    for (let i = target; i >= 0 && i < grid.children.length; i += step) {
+      if (!grid.children[i].disabled) return grid.children[i].focus();
+    }
+  });
 }
 
 /** Sprachwechsel: Oberfläche, Auswahllisten und — wenn möglich — der Pool selbst. */

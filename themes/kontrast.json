@@ -1,0 +1,15 @@
+{
+  "id": "kontrast",
+  "nameKey": "theme.contrast",
+  "font": "system",
+  "colors": {
+    "bg": "#000000",
+    "surface": "#0a0a0a",
+    "tile": "#141414",
+    "tileMarked": "#ffe600",
+    "text": "#ffffff",
+    "textMuted": "#d0d0d0",
+    "accent": "#ffe600",
+    "line": "#ffffff"
+  }
+}

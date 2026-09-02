@@ -1,0 +1,15 @@
+{
+  "id": "schiefer",
+  "nameKey": "theme.slate",
+  "font": "system",
+  "colors": {
+    "bg": "#e9ecef",
+    "surface": "#f8f9fa",
+    "tile": "#ffffff",
+    "tileMarked": "#237a34",
+    "text": "#212529",
+    "textMuted": "#5c636a",
+    "accent": "#1971c2",
+    "line": "#ced4da"
+  }
+}

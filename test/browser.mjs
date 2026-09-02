@@ -53,12 +53,12 @@ const tiles = page.locator(".tile");
 // Grundzustand
 check("Karte rendert 25 Felder (5×5)", (await tiles.count()) === 25, `${await tiles.count()} Felder`);
 check("Titel kommt aus dem Theme", (await page.locator("#brand-title").textContent()) === "Bingo Box");
-check("Alle mitgelieferten Pools stehen zur Wahl", (await page.locator("#pool-select option").count()) === 8);
+check("Alle mitgelieferten Pools stehen zur Wahl", (await page.locator("#pool-select option").count()) === 36);
 check(
   "Pools sind nach Sprache gruppiert, Deutsch zuerst",
   (await page.locator("#pool-select optgroup").first().getAttribute("label")) === "Deutsch" &&
-    (await page.locator('#pool-select optgroup[label="Deutsch"] option').count()) === 4 &&
-    (await page.locator('#pool-select optgroup[label="English"] option').count()) === 4,
+    (await page.locator('#pool-select optgroup[label="Deutsch"] option').count()) === 18 &&
+    (await page.locator('#pool-select optgroup[label="English"] option').count()) === 18,
 );
 
 // Kachelgröße passt sich dem Fenster an

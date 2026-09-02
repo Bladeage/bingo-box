@@ -1,0 +1,15 @@
+{
+  "id": "kreidetafel",
+  "nameKey": "theme.chalkboard",
+  "font": "rounded",
+  "colors": {
+    "bg": "#1e2a25",
+    "surface": "#26352f",
+    "tile": "#2d3f37",
+    "tileMarked": "#f5e663",
+    "text": "#f4f1e8",
+    "textMuted": "#b3bdb4",
+    "accent": "#ffb3c1",
+    "line": "#43574d"
+  }
+}

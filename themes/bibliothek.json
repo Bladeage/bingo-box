@@ -1,0 +1,15 @@
+{
+  "id": "bibliothek",
+  "nameKey": "theme.library",
+  "font": "serif",
+  "colors": {
+    "bg": "#2b1f16",
+    "surface": "#382a1f",
+    "tile": "#43321f",
+    "tileMarked": "#8c6414",
+    "text": "#f3e9d8",
+    "textMuted": "#c4ad92",
+    "accent": "#d8a657",
+    "line": "#5a4632"
+  }
+}

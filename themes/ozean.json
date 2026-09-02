@@ -1,0 +1,15 @@
+{
+  "id": "ozean",
+  "nameKey": "theme.ocean",
+  "font": "system",
+  "colors": {
+    "bg": "#06283d",
+    "surface": "#0b3a54",
+    "tile": "#0f4c6e",
+    "tileMarked": "#ff9f1c",
+    "text": "#eaf6ff",
+    "textMuted": "#9dc3d9",
+    "accent": "#2ec4b6",
+    "line": "#1f6a8f"
+  }
+}

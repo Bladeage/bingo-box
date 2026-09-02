@@ -1,0 +1,15 @@
+{
+  "id": "retro",
+  "nameKey": "theme.retro",
+  "font": "mono",
+  "colors": {
+    "bg": "#f3e9d2",
+    "surface": "#faf3e3",
+    "tile": "#fff8e8",
+    "tileMarked": "#c2401c",
+    "text": "#3b2a1a",
+    "textMuted": "#7a5c44",
+    "accent": "#1f7a7a",
+    "line": "#d8c7a4"
+  }
+}

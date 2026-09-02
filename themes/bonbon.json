@@ -1,0 +1,15 @@
+{
+  "id": "bonbon",
+  "nameKey": "theme.candy",
+  "font": "rounded",
+  "colors": {
+    "bg": "#fff0f5",
+    "surface": "#ffffff",
+    "tile": "#ffffff",
+    "tileMarked": "#c42c7f",
+    "text": "#3a1f33",
+    "textMuted": "#7d5a74",
+    "accent": "#147a6a",
+    "line": "#f2c7dc"
+  }
+}

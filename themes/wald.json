@@ -1,0 +1,15 @@
+{
+  "id": "wald",
+  "nameKey": "theme.forest",
+  "font": "system",
+  "colors": {
+    "bg": "#0f1f16",
+    "surface": "#172b20",
+    "tile": "#1e372a",
+    "tileMarked": "#e0a83a",
+    "text": "#eef6ef",
+    "textMuted": "#9fbfae",
+    "accent": "#7ad39a",
+    "line": "#2f4d3c"
+  }
+}

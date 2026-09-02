@@ -1,0 +1,15 @@
+{
+  "id": "sonnenuntergang",
+  "nameKey": "theme.sunset",
+  "font": "rounded",
+  "colors": {
+    "bg": "#2a1533",
+    "surface": "#3a1f44",
+    "tile": "#4a2752",
+    "tileMarked": "#ff9e4a",
+    "text": "#fff1e6",
+    "textMuted": "#d1a9b8",
+    "accent": "#ffc857",
+    "line": "#5f3a68"
+  }
+}

@@ -48,8 +48,11 @@ Faustregel: mindestens so viele Begriffe wie Felder — für 5 × 5 also 25, bes
 mehr, damit sich die Karten der Mitspielenden unterscheiden. Reicht der Pool nicht, sagt
 die Anwendung das mit Zahlen statt abzustürzen.
 
-Mitgeliefert sind acht Pools: **Meeting-Bingo**, **Games-Showcase**, **Fußball-Kommentar**
-und **Krimi-Sonntag**, jeweils auf Deutsch und Englisch.
+Mitgeliefert sind 36 Pools, achtzehn Themen jeweils auf Deutsch und Englisch:
+**Meeting-Bingo**, **Games-Showcase**, **Fußball-Kommentar**, **Krimi-Sonntag**,
+**Homeoffice**, **Bahnfahrt**, **Weihnachten**, **Silvester**, **Autofahrt**,
+**Fitnessstudio**, **Elternabend**, **Serienabend**, **Heimwerken**, **Festival**,
+**Hochzeit**, **Wetterbericht**, **Supermarkt** und **Code-Review**.
 
 ## Eigenes Branding
 
@@ -72,7 +75,10 @@ die übrigen werden passend dazu gemischt.
 `font` kennt `system`, `serif`, `mono` und `rounded`. Als `logo` geht eine URL oder ein
 eingebettetes Bild — Letzteres macht den Teilen-Link lang, deshalb ist bei 300 KB Schluss.
 Die mitgelieferten Themes tragen statt `name` einen `nameKey`, damit ihr Name der
-Oberflächensprache folgt.
+Oberflächensprache folgt. Zwölf sind dabei: **Mitternacht**, **Papier**, **Neon**,
+**Wald**, **Ozean**, **Sonnenuntergang**, **Bibliothek**, **Kreidetafel**, **Retro**,
+**Bonbon**, **Schiefer** und **Hoher Kontrast** — hell wie dunkel, mit allen vier
+Schriftarten.
 
 ## Weitere Oberflächensprache
 

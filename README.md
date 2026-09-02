@@ -47,8 +47,11 @@ Rule of thumb: at least as many terms as there are tiles — 25 for a 5 × 5 gri
 lot more so that players' cards differ. If a pool is too small, the app says so with
 numbers instead of breaking.
 
-Eight pools ship with the app: **Meeting Bingo**, **Games Showcase**, **Football
-Commentary** and **Crime Drama**, each in German and English.
+Thirty-six pools ship with the app, eighteen topics each in German and English:
+**Meeting Bingo**, **Games Showcase**, **Football Commentary**, **Crime Drama**,
+**Home Office**, **Train Travel**, **Christmas**, **New Year's Eve**, **Road Trip**,
+**Gym**, **Parents' Evening**, **Binge Night**, **DIY**, **Festival**, **Wedding**,
+**Weather Forecast**, **Supermarket** and **Code Review**.
 
 ## Your own branding
 
@@ -71,7 +74,9 @@ mixes the rest to match.
 `font` accepts `system`, `serif`, `mono` and `rounded`. `logo` takes a URL or an embedded
 image — the latter makes the share link long, so it is capped at 300 KB. The themes that
 ship with the app use `nameKey` instead of `name` so their names follow the interface
-language.
+language. Twelve are included: **Midnight**, **Paper**, **Neon**, **Forest**, **Ocean**,
+**Sunset**, **Library**, **Chalkboard**, **Retro**, **Candy**, **Slate** and
+**High contrast** — light and dark, with all four typefaces represented.
 
 ## Another interface language
 

@@ -1,5 +1,14 @@
 [
   { "id": "mitternacht", "file": "mitternacht.json" },
   { "id": "papier", "file": "papier.json" },
-  { "id": "neon", "file": "neon.json" }
+  { "id": "neon", "file": "neon.json" },
+  { "id": "wald", "file": "wald.json" },
+  { "id": "ozean", "file": "ozean.json" },
+  { "id": "sonnenuntergang", "file": "sonnenuntergang.json" },
+  { "id": "bibliothek", "file": "bibliothek.json" },
+  { "id": "kreidetafel", "file": "kreidetafel.json" },
+  { "id": "retro", "file": "retro.json" },
+  { "id": "bonbon", "file": "bonbon.json" },
+  { "id": "schiefer", "file": "schiefer.json" },
+  { "id": "kontrast", "file": "kontrast.json" }
 ]

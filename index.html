@@ -2,7 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Bingo Box</title>
     <meta
       name="description"
@@ -23,31 +23,45 @@
       </div>
     </header>
 
-    <section class="toolbar" data-i18n-label="toolbar.section">
-      <div class="field">
-        <label for="pool-select" data-i18n="toolbar.pool">Begriffe</label>
-        <select id="pool-select"></select>
-      </div>
-      <div class="field">
-        <label for="theme-select" data-i18n="toolbar.theme">Aussehen</label>
-        <select id="theme-select"></select>
-      </div>
-      <div class="field">
-        <label for="grid-select" data-i18n="toolbar.grid">Raster</label>
-        <select id="grid-select">
-          <option value="3x3">3 × 3</option>
-          <option value="4x4">4 × 4</option>
-          <option value="5x5" selected>5 × 5</option>
-          <option value="5x6">5 × 6</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="lang-select" data-i18n="toolbar.language">Sprache</label>
-        <select id="lang-select"></select>
-      </div>
-      <div class="field field--check">
-        <input type="checkbox" id="free-space" />
-        <label for="free-space" data-i18n="toolbar.freeSpace">Freifeld in der Mitte</label>
+    <section class="toolbar toolbar--open" data-i18n-label="toolbar.section">
+      <!-- Nur auf kleinen Schirmen sichtbar: klappt die Einstellungen auf und zu -->
+      <button
+        type="button"
+        id="btn-settings"
+        class="btn toolbar__toggle"
+        aria-expanded="true"
+        aria-controls="toolbar-settings"
+        data-i18n="toolbar.section"
+      >
+        Karte einstellen
+      </button>
+      <div id="toolbar-settings" class="toolbar__settings">
+        <div class="field">
+          <label for="pool-select" data-i18n="toolbar.pool">Begriffe</label>
+          <select id="pool-select"></select>
+        </div>
+        <div class="field">
+          <label for="theme-select" data-i18n="toolbar.theme">Aussehen</label>
+          <select id="theme-select"></select>
+        </div>
+        <div class="field">
+          <label for="grid-select" data-i18n="toolbar.grid">Raster</label>
+          <select id="grid-select">
+            <option value="3x3">3 × 3</option>
+            <option value="4x4">4 × 4</option>
+            <option value="5x5" selected>5 × 5</option>
+            <option value="5x6">5 × 6</option>
+            <option value="6x6">6 × 6</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="lang-select" data-i18n="toolbar.language">Sprache</label>
+          <select id="lang-select"></select>
+        </div>
+        <div class="field field--check">
+          <input type="checkbox" id="free-space" />
+          <label for="free-space" data-i18n="toolbar.freeSpace">Freifeld in der Mitte</label>
+        </div>
       </div>
 
       <div class="actions">

@@ -221,6 +221,12 @@ await page.waitForTimeout(150);
 const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 check("Kein horizontales Scrollen auf dem Handy", overflow <= 0, `${overflow}px Überhang`);
 
+// Auf dem Handy kann die Werkzeugleiste zugeklappt sein — erst öffnen, dann bedienen.
+if ((await page.getAttribute("#btn-settings", "aria-expanded")) === "false") {
+  await page.click("#btn-settings");
+  await page.waitForTimeout(150);
+}
+
 // Sprachumschaltung
 await page.selectOption("#pool-select", "krimi.de");
 await page.waitForTimeout(150);

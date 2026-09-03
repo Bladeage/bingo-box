@@ -280,7 +280,7 @@ main {
   text-align: center;
   padding: clamp(0.15rem, calc(var(--cell) * 0.07), 0.6rem);
   font: inherit;
-  font-size: clamp(0.55rem, calc(var(--cell) * var(--font-scale)), 1.25rem);
+  font-size: clamp(0.4rem, calc(var(--cell) * var(--font-scale)), 1.25rem);
   font-weight: 600;
   line-height: 1.2;
   color: var(--c-text);
@@ -418,6 +418,13 @@ main {
 }
 
 /* --- Kompakt: schmale Schirme und flache Querformate (Handy quer) --- */
+/* Schmale Schirme: Kacheln nicht unter Fingergröße, lieber ein Stück scrollen. */
+@media (max-width: 640px) {
+  :root {
+    --cell-min: 64px;
+  }
+}
+
 @media (max-width: 640px), ((orientation: landscape) and (max-height: 520px)) {
   /* Leiste als Zweispalter: oben Auf/Zu-Knopf und „Neue Karte“, dann die
      (einklappbaren) Einstellungen, darunter die übrigen Knöpfe. */

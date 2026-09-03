@@ -248,7 +248,8 @@ function renderGrid() {
       tile.type = "button";
       tile.className = `tile${cell.free ? " tile--free" : ""}`;
       tile.textContent = cell.text;
-      tile.style.setProperty("--font-scale", fontScale(cell.text));
+      tile.dataset.scale = fontScale(cell.text);
+      tile.style.setProperty("--font-scale", tile.dataset.scale);
       tile.dataset.index = String(index);
       tile.setAttribute("aria-pressed", String(state.marked.has(index)));
       if (cell.free) {
@@ -259,6 +260,7 @@ function renderGrid() {
       return tile;
     }),
   );
+  delete grid.dataset.fitted;
   fitGrid();
 }
 
@@ -364,6 +366,35 @@ function fitGrid() {
   // Nur bei Änderung schreiben — der ResizeObserver unten meldet sich sonst im Kreis.
   const next = `${Math.max(1, Math.floor(cell))}px`;
   if (grid.style.getPropertyValue("--cell") !== next) grid.style.setProperty("--cell", next);
+
+  // Text nur neu einpassen, wenn sich Kachelgröße, Schrift oder Karte geändert haben.
+  const key = `${next}|${getComputedStyle(grid).fontFamily}`;
+  if (grid.dataset.fitted !== key) {
+    grid.dataset.fitted = key;
+    fitTileText(grid);
+  }
+}
+
+const MIN_FONT_SCALE = 0.06;
+
+/**
+ * Nachmessen: Kacheln, deren Text über den Rand läuft, bekommen eine kleinere
+ * Schrift — in wenigen Runden bis zur Untergrenze. Je Runde erst alle lesen, dann alle
+ * schreiben, sonst rechnet der Browser das Layout für jede Kachel einzeln neu. Die
+ * Kachelgröße bleibt dabei gleich, der ResizeObserver springt also nicht an.
+ */
+function fitTileText(grid) {
+  const tiles = [...grid.children];
+  for (const tile of tiles) tile.style.setProperty("--font-scale", tile.dataset.scale);
+
+  for (let round = 0; round < 4; round++) {
+    const overflowing = tiles.filter((tile) => tile.scrollHeight > tile.clientHeight + 1);
+    if (!overflowing.length) return;
+    for (const tile of overflowing) {
+      const scale = parseFloat(tile.style.getPropertyValue("--font-scale")) * 0.85;
+      tile.style.setProperty("--font-scale", Math.max(MIN_FONT_SCALE, scale).toFixed(3));
+    }
+  }
 }
 
 /**
@@ -458,10 +489,17 @@ function bindEvents() {
       // privater Modus — dann gilt die Wahl nur bis zum Neuladen
     }
   };
+  // Ohne gemerkte Wahl startet die Leiste auf kleinen Schirmen zu, damit die Karte Platz hat.
+  let remembered = null;
   try {
-    if (localStorage.getItem(TOOLBAR_KEY) === "closed") setSettingsOpen(false);
+    remembered = localStorage.getItem(TOOLBAR_KEY);
   } catch {
-    // ohne Speicher bleibt die Leiste offen
+    // ohne Speicher entscheidet die Schirmgröße
+  }
+  const small = matchMedia("(max-width: 640px), ((orientation: landscape) and (max-height: 520px))").matches;
+  if (remembered === "closed" || (!remembered && small)) {
+    toolbar.classList.remove("toolbar--open");
+    el("btn-settings").setAttribute("aria-expanded", "false");
   }
   el("btn-settings").addEventListener("click", () => setSettingsOpen(!toolbar.classList.contains("toolbar--open")));
 
